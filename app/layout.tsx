@@ -30,7 +30,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <Header />
-        <div className="h-screen">{children}</div>
+        <div className="h-auto">{children}</div>
         <Footer />
       </body>
     </html>

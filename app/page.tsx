@@ -3,7 +3,7 @@ import Image from "next/image";
 
 export const Home = () => {
   return (
-    <div className="w-full h-full flex justify-center items-center bg-gradient-to-r from-yellow-500 to-blue-500">
+    <div className="w-full h-screen flex justify-center items-center bg-gradient-to-r from-yellow-500 to-blue-500">
       <div className="flex flex-col w-[50%] mb-[200px]  text-left ml-[200px]">
         <h1 className="text-[90px] font-bold text-white">
           Find & Recover with efficiency
