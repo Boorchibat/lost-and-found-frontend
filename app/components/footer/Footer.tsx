@@ -1,35 +1,48 @@
+"use client";
+
 import Image from "next/image";
-import { Logo } from "../header/logo/Logo";
-import { Contact } from "./componets/Contact";
+import { Site } from "./componets/Site";
 import { Help } from "./componets/Help";
 import { Links } from "./componets/Links";
-import { Site } from "./componets/Site";
+import { Contact } from "./componets/Contact";
 
 export const Footer = () => {
   return (
-    <div className="w-full flex bg-gradient-to-r from-blue-300 to-yellow-300 h-[180px]">
-      <div className="w-[15%]">
-         <div className="w-full h-full gap-x-5 flex items-center pl-[100px]">
-              <Image src="../lost.svg" alt="image" width={100} height={100} />
-            </div>
-      </div>
-      <div className="w-[15%]">
-        <Site />
-      </div>
-      <div className="w-[20%]">
-        <Help />
-      </div>
-      <div className="w-[15%]">
-        <div className="flex flex-col mt-[120px]">
-          <h1 className="font-bold">@Copyright 2025 Lost and Found Boorchi Batzorigt</h1>
+   <footer className="w-full bg-gradient-to-r from-blue-300 to-yellow-300 text-black py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-wrap justify-between items-start gap-6">
+        <div className="w-full md:w-[15%] flex justify-center md:justify-start items-center mb-4 md:mb-0">
+          <Image
+            src="/lost.svg"
+            alt="Lost and Found logo"
+            width={100}
+            height={100}
+            className="w-16 h-16 sm:w-20 sm:h-20"
+            priority
+          />
+        </div>
+
+        <div className="w-full sm:w-1/2 md:w-[15%] flex justify-center md:justify-start mb-4 md:mb-0">
+          <Site />
+        </div>
+
+        <div className="w-full sm:w-1/2 md:w-[20%] flex justify-center md:justify-start mb-4 md:mb-0">
+          <Help />
+        </div>
+
+        <div className="w-full md:w-[15%] flex justify-center md:justify-start items-center mb-4 md:mb-0">
+          <p className="text-sm font-bold text-center md:text-left">
+            © 2025 Lost and Found Boorchi Batzorigt
+          </p>
+        </div>
+
+        <div className="w-full sm:w-1/2 md:w-[15%] flex justify-center md:justify-start mb-4 md:mb-0">
+          <Links />
+        </div>
+
+        <div className="w-full sm:w-1/2 md:w-[20%] flex justify-center md:justify-start mb-4 md:mb-0">
+          <Contact />
         </div>
       </div>
-      <div className="w-[15%]">
-        <Links />
-      </div>
-      <div className="w-[20%]">
-        <Contact />
-      </div>
-    </div>
+    </footer>
   );
 };

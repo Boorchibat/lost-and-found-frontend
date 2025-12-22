@@ -1,12 +1,8 @@
 "use client";
-import { Button } from "@/components/ui/button";
-import { Searchbar } from "./components/search/Searchbar";
-import { ReportCard } from "./components/card/ReportCard";
 import { useState } from "react";
-
-type ReportProps = {
-  title: String;
-};
+import { ReportCard } from "../components/report-page/components/card/ReportCard";
+import { Searchbar } from "../components/report-page/components/search/Searchbar";
+import { Button } from "@/components/ui/button";
 const Data = [
   {
     itemname: "Blue Adidas Shoes",
@@ -215,52 +211,32 @@ const Data = [
   },
 ];
 
-export const ReportPage = (props: ReportProps) => {
+export const Search = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const filterData = Data.filter(
     (item) =>
       item.itemname.toLowerCase().includes(searchTerm.toLowerCase()) ||
       item.description.toLowerCase().includes(searchTerm.toLocaleLowerCase())
   );
-
-  const title = props.title;
   return (
-    <div className="w-full flex flex-col items-center px-4 py-8 md:py-12">
-      <div className="w-full max-w-5xl flex flex-col items-center mb-8">
-        <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-6 text-center">
-          {title}
-        </h1>
-        <div className="w-full justify-center flex flex-col sm:flex-row items-center gap-4">
-          <div className="flex-grow w-full sm:w-auto flex justify-center">
-            <Searchbar setQuery={setSearchTerm} />
-          </div>
-          <div className="flex justify-center items-center">
-            <Button className="h-12 w-full sm:w-36">Report</Button>
-          </div>
-        </div>
+    <div className="w-full h-auto bg-gradient-to-r from-yellow-300 to-blue-200 flex flex-col justify-center items-center">
+      <div className="mt-[40px] w-full flex flex-col items-center justify-center">
+        <h1 className="mb-[20px] font-bold text-[40px]">Search for an Item</h1>
+        <Searchbar setQuery={setSearchTerm} />
       </div>
-
-      <div className="w-full flex justify-center">
-        <div className="w-full max-w-7xl p-4 rounded-lg">
-          <div className="flex flex-wrap justify-center gap-4">
-            {filterData.length > 0 ? (
-              filterData.map((item) => (
-                <ReportCard key={item._id} {...item} />
-              ))
-            ) : (
-              <p className="text-gray-500 mt-10">
-                No items found matching "{searchTerm}"
-              </p>
-            )}
+      <div className="mt-[30px] gap-x-20 flex flex-wrap w-[70%] mb-[30px]">
+        {filterData.length > 0 ? (
+          filterData.map((item) => <ReportCard key={item._id} {...item} />)
+        ) : (
+          <div className="w-full flex justify-center items-center gap-x-5 mt-[15px]">
+            <h1 className="font-bold text-[30px]">No items found...</h1>
+            <a href="/">
+              <Button className="bg-blue-700 hover:bg-green-500">Return to Home Page</Button>
+            </a>
           </div>
-        </div>
-      </div>
-
-      <div className="w-full flex justify-center mt-6">
-        <a href="/lost-list">
-          <p className="text-blue-700 hover:underline">View More...</p>
-        </a>
+        )}
       </div>
     </div>
   );
 };
+export default Search;

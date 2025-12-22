@@ -10,50 +10,49 @@ export const ReportCard = () => {
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-
     if (!file) {
       setUploadMessage("");
       return;
     }
-
     if (!file.type.startsWith("image/")) {
       setUploadMessage("❌ File must be an image.");
       return;
     }
-
     setUploadMessage("✅ Image uploaded successfully!");
   };
+
   return (
-    <div className="w-[60%] border-3 mt-[30px] rounded-md border-black h-[80%] bg-yellow-100 flex flex-col items-center">
-      <div
-        className="flex flex-col w-[90%]
-      "
-      >
-        <div className="flex items-center justify-between gap-x-5 w-full mt-[20px] p-5">
-          <h1 className="font-bold text-[30px]">Name:</h1>
-          <Input className="border-gray-500 w-[500px] p-3" />
+    <div className="w-[80%] lg:w-[60%] h-auto bg-yellow-100 rounded-2xl flex flex-col items-center p-4 md:p-6 mt-6">
+      
+      <div className="flex flex-col w-full gap-4 md:gap-6">
+        <div className="flex mt-[20px] flex-col sm:flex-row items-center sm:justify-between gap-2 sm:gap-4">
+          <h1 className="font-bold text-lg sm:text-xl md:text-2xl">Name:</h1>
+          <Input className="w-full sm:w-3/5 border-1 border-black md:w-2/3 p-2" />
         </div>
-        <div className="flex items-center justify-between gap-x-5 w-full mt-[20px] p-5">
-          <h1 className="font-bold text-[30px]">Item:</h1>
-          <Input className="border-gray-500 w-[500px] p-3" />
+
+        <div className="flex mt-[20px] flex-col sm:flex-row items-center sm:justify-between gap-2 sm:gap-4">
+          <h1 className="font-bold text-lg sm:text-xl md:text-2xl">Item:</h1>
+          <Input className="w-full border-1 border-black sm:w-3/5 md:w-2/3 p-2" />
         </div>
-      </div>
-      <div className="flex flex-col mt-[40px]">
-        <div className="flex items-center justify-between gap-x-5 w-full mt-[20px] p-5">
-          <h1 className="font-bold text-[30px]">Location:</h1>
-          <Input className="border-gray-500 w-[500px] p-3" />
+
+        <div className="flex mt-[20px] flex-col sm:flex-row items-center sm:justify-between gap-2 sm:gap-4">
+          <h1 className="font-bold text-lg sm:text-xl md:text-2xl">Location:</h1>
+          <Input className="w-full sm:w-3/5 border-1 border-black md:w-2/3 p-2" />
         </div>
-        <div className="flex items-center justify-between gap-x-5 w-full mt-[20px] p-5">
-          <h1 className="font-bold text-[30px]">Date:</h1>
-          <Input type="date" className="border-gray-500 w-[500px] p-3" />
+
+        <div className="flex mt-[20px] flex-col sm:flex-row items-center sm:justify-between gap-2 sm:gap-4">
+          <h1 className="font-bold text-lg sm:text-xl md:text-2xl">Date:</h1>
+          <Input type="date" className="w-full border-1 border-black sm:w-3/5 md:w-2/3 p-2" />
         </div>
-        <div className="flex items-center justify-between gap-x-5 w-full mt-[20px] p-5">
-          <h1 className="font-bold text-[30px]">Item Description:</h1>
-          <Input className="border-gray-500 w-[500px] p-3" />
+
+        <div className="flex mt-[20px] flex-col sm:flex-row items-center sm:justify-between gap-2 sm:gap-4">
+          <h1 className="font-bold text-lg sm:text-xl md:text-2xl">Item Description:</h1>
+          <Input className="w-full sm:w-3/5 border-1 border-black md:w-2/3 p-2" />
         </div>
-        <div className="flex items-center justify-between gap-x-5 w-full mt-[20px] p-5">
-          <h1 className="font-bold text-[30px]">Upload Photo:</h1>
-          <div className="flex w-full justify-end items-center">
+
+        <div className="flex flex-col sm:flex-row items-center sm:justify-between gap-2 sm:gap-4">
+          <h1 className="font-bold text-lg sm:text-xl md:text-2xl">Upload Photo:</h1>
+          <div className="flex flex-col w-full sm:w-3/5 md:w-2/3">
             <input
               id="upload"
               type="file"
@@ -62,19 +61,17 @@ export const ReportCard = () => {
               onChange={handleFileUpload}
               className="hidden"
             />
-
             <label
               htmlFor="upload"
-              className="border-gray-500 flex justify-center w-[500px] border-1 border-gray-500 rounded-md p-3 cursor:pointer"
+              className="flex items-center justify-center gap-2 border border-gray-500 rounded-md p-2 cursor-pointer"
             >
-             <Image src={"../upload.svg"} alt="image" height={30} width={30}/>
+              <Image src="/upload.svg" alt="Upload" width={30} height={30} />
+              Upload Image
             </label>
             {uploadMessage && (
               <p
                 className={`mt-2 font-semibold ${
-                  uploadMessage.includes("❌")
-                    ? "text-red-600"
-                    : "text-green-600"
+                  uploadMessage.includes("❌") ? "text-red-600" : "text-green-600"
                 }`}
               >
                 {uploadMessage}
@@ -83,9 +80,14 @@ export const ReportCard = () => {
           </div>
         </div>
       </div>
-      <div className="flex gap-x-5">
-        <Button>Submit</Button>
-        <Button>Reset</Button>
+
+      <div className="flex flex-col sm:flex-row gap-8 mt-6 w-full sm:justify-center">
+        <Button className="w-full sm:w-44 h-12 hover:bg-green-400 hover:text-black">
+          Submit
+        </Button>
+        <Button className="w-full sm:w-44 h-12 bg-white text-black hover:bg-red-400 hover:text-white">
+          Reset
+        </Button>
       </div>
     </div>
   );

@@ -1,10 +1,6 @@
-import { ReportPage } from "../components/report-page/ReportPage";
+import { ReportLayout } from "../components/report-page-layout/ReportLayout";
 
-const ReportFound = () => {
-  return (
-    <div className="w-full h-full bg-gradient-to-r from-yellow-500 to-blue-400">
-      <ReportPage title="Found items"/>
-    </div>
-  );
+const page = () => {
+  return <div className="w-full h-full"><ReportLayout title="Report a Found item"/></div>;
 };
-export default ReportFound;
+export default page;
