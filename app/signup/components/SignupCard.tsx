@@ -4,9 +4,18 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { signUp } from "@/lib/auth/auth";
 import { Formik, Form } from "formik";
-import { useRouter } from "next/navigation";
-import { useEffect } from "react";
 import * as Yup from "yup";
+import { useRouter } from "next/navigation";
+import { useUser } from "../../context/UserContext";
+
+interface SignUpPayload {
+  name: string;
+  email: string;
+  number: string;
+  username: string;
+  password: string;
+  profileImage: string;
+}
 
 const SignupSchema = Yup.object({
   name: Yup.string().required("Name is required"),
@@ -20,15 +29,10 @@ const SignupSchema = Yup.object({
     .required("Password is required"),
 });
 
-
 export const SignupCard = () => {
-    const router = useRouter();
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (token) {
-      router.push("/");
-    }
-  }, [router]);
+  const router = useRouter();
+  const { setUser, setToken } = useUser();
+
   return (
     <Formik
       initialValues={{
@@ -37,29 +41,29 @@ export const SignupCard = () => {
         number: "",
         username: "",
         password: "",
+        profileImage: "./user.svg", // ✅ required field added
       }}
       validationSchema={SignupSchema}
-      onSubmit={async (values, { setSubmitting }) => {
+      onSubmit={async (values: SignUpPayload, { setSubmitting }) => {
         try {
-          await signUp({
-            name: values.name,
-            email: values.email,
-            number: values.number,
-            username: values.username,
-            password: values.password,
-            profileImage: "./user.svg",
-          });
-          alert("Signup successful!");
-        } catch (error: any) {
-          console.error("FULL SIGNUP ERROR:", error);
+          const data: any = await signUp(values); // send full payload including profileImage
 
-          if (error?.response?.data?.message) {
-            alert("Backend error " + error.response.data.message);
-          } else if (error?.message) {
-            alert("Network/axios error: " + error.message);
-          } else {
-            alert("Signup failed");
-          }
+          const user = {
+            _id: data.user._id,
+            username: data.user.username,
+            email: data.user.email,
+          };
+          const token = data.token;
+
+          setUser(user);
+          setToken(token);
+          localStorage.setItem("user", JSON.stringify(user));
+          localStorage.setItem("token", token);
+
+          router.push("/");
+        } catch (error: any) {
+          console.error("SIGNUP ERROR:", error);
+          alert(error?.response?.data?.message || error?.message || "Signup failed");
         } finally {
           setSubmitting(false);
         }
@@ -78,7 +82,7 @@ export const SignupCard = () => {
           </div>
 
           <div className="w-full p-5">
-            <h1 className="text-[20px]">Personal Email:</h1>
+            <h1 className="text-[20px]">Email:</h1>
             <Input name="email" value={values.email} onChange={handleChange} />
             {touched.email && errors.email && (
               <p className="text-red-500 text-sm">{errors.email}</p>
@@ -87,12 +91,7 @@ export const SignupCard = () => {
 
           <div className="w-full p-5">
             <h1 className="text-[20px]">Phone Number:</h1>
-            <Input
-              type="tel"
-              name="number"
-              value={values.number}
-              onChange={handleChange}
-            />
+            <Input type="tel" name="number" value={values.number} onChange={handleChange} />
             {touched.number && errors.number && (
               <p className="text-red-500 text-sm">{errors.number}</p>
             )}
@@ -100,27 +99,20 @@ export const SignupCard = () => {
 
           <div className="w-full p-5">
             <h1 className="text-[20px]">Username:</h1>
-            <Input
-              name="username"
-              value={values.username}
-              onChange={handleChange}
-            />
+            <Input name="username" value={values.username} onChange={handleChange} />
             {touched.username && errors.username && (
               <p className="text-red-500 text-sm">{errors.username}</p>
             )}
           </div>
+
           <div className="w-full p-5">
             <h1 className="text-[20px]">Password:</h1>
-            <Input
-              type="password"
-              name="password"
-              value={values.password}
-              onChange={handleChange}
-            />
+            <Input type="password" name="password" value={values.password} onChange={handleChange} />
             {touched.password && errors.password && (
               <p className="text-red-500 text-sm">{errors.password}</p>
             )}
           </div>
+
           <div className="w-full flex justify-around mt-5">
             <Button type="submit" className="w-[40%]" disabled={isSubmitting}>
               {isSubmitting ? "Signing up..." : "Sign up"}

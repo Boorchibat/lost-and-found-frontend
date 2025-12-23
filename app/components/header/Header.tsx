@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useUser } from "../../context/UserContext";
 
 export const Header = () => {
   const menuItems = [
@@ -22,19 +22,9 @@ export const Header = () => {
     { label: "Profile", href: "/account-info" },
     { label: "Search", href: "/search" },
   ];
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
   const router = useRouter();
-
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-    setIsLoggedIn(!!token);
-  }, []);
-
-  const handleSignOut = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-    setIsLoggedIn(false);
-  };
+  const { user, logout } = useUser();
 
   const handleSignIn = () => {
     router.push("/login");
@@ -46,6 +36,7 @@ export const Header = () => {
         <div className="w-[50%] flex justify-center md:justify-start">
           <Logo />
         </div>
+
         <nav className="hidden md:flex items-center gap-2">
           {menuItems.map((item) => (
             <Link key={item.href} href={item.href} className="inline-block">
@@ -53,10 +44,11 @@ export const Header = () => {
             </Link>
           ))}
         </nav>
+
         <div className="hidden md:flex ml-[30px]">
-          {isLoggedIn ? (
+          {user ? (
             <Button
-              onClick={handleSignOut}
+              onClick={logout}
               className="bg-gray-500 w-[70%] flex justify-center"
             >
               Sign Out
@@ -77,10 +69,7 @@ export const Header = () => {
             </DropdownMenuTrigger>
             <DropdownMenuContent
               side="bottom"
-              className="w-40
-             animate-in fade-in-0 slide-in-from-top-2
-             animate-out fade-out-0 slide-out-to-top-2
-             duration-300"
+              className="w-40 animate-in fade-in-0 slide-in-from-top-2 animate-out fade-out-0 slide-out-to-top-2 duration-300"
             >
               {menuItems.map((item) => (
                 <DropdownMenuItem key={item.href}>
@@ -89,18 +78,19 @@ export const Header = () => {
                   </Link>
                 </DropdownMenuItem>
               ))}
+
               <DropdownMenuItem>
-                {isLoggedIn ? (
+                {user ? (
                   <Button
-                    onClick={handleSignOut}
-                    className="bg-gray-500 w-[70%] flex justify-center"
+                    onClick={logout}
+                    className="bg-gray-500 w-full flex justify-center"
                   >
                     Sign Out
                   </Button>
                 ) : (
                   <Button
                     onClick={handleSignIn}
-                    className="bg-green-500 w-[70%] flex justify-center"
+                    className="bg-green-500 w-full flex justify-center"
                   >
                     Sign In
                   </Button>

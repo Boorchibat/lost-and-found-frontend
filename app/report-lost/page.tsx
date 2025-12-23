@@ -1,9 +1,20 @@
-import { ReportLayout } from "../components/report-page-layout/ReportLayout"
+"use client";
 
- const page = () => {
+import { ReportLayout } from "../components/report-page-layout/ReportLayout";
+import { useUser } from "../context/UserContext";
+
+const Page = () => {
+  const { user, loading } = useUser();
+
+  if (loading) return null;
+  if (!user) return null;
+
   return (
-    <div className="w-full h-full"><ReportLayout title="Report a Lost item"/></div>
-  )
-}
-export default page
+    <ReportLayout
+      title="Report a lost Item"
+      isFound="In progress"
+    />
+  );
+};
 
+export default Page;

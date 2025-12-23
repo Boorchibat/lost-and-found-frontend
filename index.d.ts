@@ -42,11 +42,32 @@ type SignupPayload = {
   password: string;
   profileImage: string;
 };
-type SignInPayload = {
+ type SignupResponse = {
+  success: boolean;
+  token: string;
+  user: {
+    _id: string;
+    username: string;
+    email: string;
+    isVerified: boolean;
+  };
+};
+ type SignInPayload = {
   email: string;
   password: string;
 };
-type SignInResponse = {
+
+ type SignInResponse = {
+  success: boolean;
+  token: string;
+  user: {
+    _id: string;
+    username: string;
+    email: string;
+    isVerified: boolean;
+  };
+};
+type SignInResponse =  {
   success: boolean;
   token?: string;
   user?: {
@@ -54,16 +75,4 @@ type SignInResponse = {
     username: string;
     email: string;
     isVerified: boolean;
-  };
-  requiresVerification?: boolean;
-  message?: string;
-  email?: string;
-};
-type verfiyProps = {
-  token: string;
-  user: {
-    email: string;
-    username: string;
-    isVerified: boolean;
-  };
-};
+  }}
