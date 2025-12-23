@@ -1,15 +1,19 @@
-import axios from "axios";
+import { postItems } from "../getDataFromBackend";
 
-export const PostItem = async (payload: any) => {
-  const token = localStorage.getItem("token");
+export interface ItemPayload {
+  itemname: string;
+  isFound: "Found" | "In progress";
+  User: string;
+  mainImage: { url: string; public_id: string };
+  images: { url: string; public_id: string }[];
+  description: string;
+  location: string;
+  contactNumber: number;
+  contactEmail: string;
+  name: string;
+}
 
-  return axios.post(
-    `${process.env.NEXT_PUBLIC_API_URL}/item/create`,
-    payload,
-    {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    }
-  );
+export const PostItem = (payload: ItemPayload, token: string) => {
+  return postItems("/item", payload, token);
 };
+

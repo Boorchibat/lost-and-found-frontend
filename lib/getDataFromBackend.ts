@@ -19,6 +19,57 @@ export const postData = async <T, D>(
   const { data } = await axiosInstance.post<T>(endpoint, payload);
   return data;
 };
+export const postItems = async <T, D>(
+  endpoint: string,
+  payload: D,
+  token: string
+): Promise<T> => {
+  if (!token) throw new Error("Authentication token is required");
+
+  const { data } = await axiosInstance.post<T>(endpoint, payload, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+  });
+  return data;
+};
+
+export const getItems = async <T>(
+  endpoint: string,
+  token: string
+): Promise<T> => {
+  if (!token) throw new Error("Authentication token is required");
+
+  const { data } = await axiosInstance.get<T>(endpoint, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+  });
+
+  return data;
+};
+
+export const getItem = async <T>(
+  endpoint: string,
+  token: string
+): Promise<T> => {
+  console.log("Fetching URL:", endpoint, token);
+  if (!token) throw new Error("Authentication token is required");
+
+  const { data } = await axiosInstance.get<T>(endpoint, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+  });
+
+  return data;
+};
+
+
+
 
 export const putData = async <T, D>(
   endpoint: string,

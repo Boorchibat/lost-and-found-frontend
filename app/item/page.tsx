@@ -1,12 +1,26 @@
 "use client";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ModalClaim } from "./components/ModalClaim";
+import { useUser } from "../context/UserContext";
+import { getItemz } from "@/lib/item/getItem";
 const page = () => {
   const [open, setOpen] = useState(false);
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
+   const { token, user  } = useUser();
+  const [Data, setData] = useState<ItemProps[]>([]);
+  
+  useEffect(() => {
+    if (!token || !user?._id) return;
+  
+    getItemz<ItemProps[]>(user._id, token)
+      .then(setData)
+      .catch(console.error);
+  }, [token, user?._id]);
+  console.log(Data)
+  
   return (
     <div className="w-full h-auto grid grid-cols-1 md:grid-cols-2 gap-6 p-6 shadow-lg bg-gradient-to-t from-yellow-500 to-blue-400">
       <div className="flex flex-col gap-4">

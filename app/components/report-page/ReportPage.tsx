@@ -2,220 +2,25 @@
 import { Button } from "@/components/ui/button";
 import { Searchbar } from "./components/search/Searchbar";
 import { ReportCard } from "./components/card/ReportCard";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useUser } from "@/app/context/UserContext";
+import { getItems } from "@/lib/getDataFromBackend";
 
 type ReportProps = {
   title: String;
 };
-const Data = [
-  {
-    itemname: "Blue Adidas Shoes",
-    isFound: "Found",
-    User: {
-      username: "anna",
-      password: "hashed_password_here",
-      email: "anna@example.com",
-      verificationCode: "912384",
-      verificationCodeExpires: new Date("2025-12-25T23:59:59Z"),
-      isVerified: true,
-      role: "user",
-      profileImage: {
-        url: "https://res.cloudinary.com/demo/image/upload/v1700000000/profile2.jpg",
-        public_id: "profile_1700000001",
-      },
-    },
-    mainImage: {
-      url: "https://res.cloudinary.com/demo/image/upload/v1710000000/items/shoes-main.jpg",
-      public_id: "items/shoes-main",
-    },
-    images: [
-      {
-        url: "https://res.cloudinary.com/demo/image/upload/v1710000000/items/shoes-1.jpg",
-        public_id: "items/shoes-1",
-      },
-      {
-        url: "https://res.cloudinary.com/demo/image/upload/v1710000000/items/shoes-2.jpg",
-        public_id: "items/shoes-2",
-      },
-    ],
-    description: "Blue Adidas running shoes, size 9.",
-    location: "Downtown Park",
-    contactNumber: 7035556789,
-    contactEmail: "finder2@example.com",
-    name: "Anna Smith",
-    claims: [],
-    status: "found",
-    _id: "item_007",
-    createdAt: new Date("2025-11-25T08:15:00Z"),
-    updatedAt: new Date("2025-12-02T16:20:00Z"),
-  },
-  {
-    itemname: "Blue Adidas Shoes",
-    isFound: "Found",
-    User: {
-      username: "anna",
-      password: "hashed_password_here",
-      email: "anna@example.com",
-      verificationCode: "912384",
-      verificationCodeExpires: new Date("2025-12-25T23:59:59Z"),
-      isVerified: true,
-      role: "user",
-      profileImage: {
-        url: "https://res.cloudinary.com/demo/image/upload/v1700000000/profile2.jpg",
-        public_id: "profile_1700000001",
-      },
-    },
-    mainImage: {
-      url: "https://res.cloudinary.com/demo/image/upload/v1710000000/items/shoes-main.jpg",
-      public_id: "items/shoes-main",
-    },
-    images: [
-      {
-        url: "https://res.cloudinary.com/demo/image/upload/v1710000000/items/shoes-1.jpg",
-        public_id: "items/shoes-1",
-      },
-      {
-        url: "https://res.cloudinary.com/demo/image/upload/v1710000000/items/shoes-2.jpg",
-        public_id: "items/shoes-2",
-      },
-    ],
-    description: "Blue Adidas running shoes, size 9.",
-    location: "Downtown Park",
-    contactNumber: 7035556789,
-    contactEmail: "finder2@example.com",
-    name: "Anna Smith",
-    claims: [],
-    status: "found",
-    _id: "item_006",
-    createdAt: new Date("2025-11-25T08:15:00Z"),
-    updatedAt: new Date("2025-12-02T16:20:00Z"),
-  },
-  {
-    itemname: "Blue Adidas Shoes",
-    isFound: "Found",
-    User: {
-      username: "anna",
-      password: "hashed_password_here",
-      email: "anna@example.com",
-      verificationCode: "912384",
-      verificationCodeExpires: new Date("2025-12-25T23:59:59Z"),
-      isVerified: true,
-      role: "user",
-      profileImage: {
-        url: "https://res.cloudinary.com/demo/image/upload/v1700000000/profile2.jpg",
-        public_id: "profile_1700000001",
-      },
-    },
-    mainImage: {
-      url: "https://res.cloudinary.com/demo/image/upload/v1710000000/items/shoes-main.jpg",
-      public_id: "items/shoes-main",
-    },
-    images: [
-      {
-        url: "https://res.cloudinary.com/demo/image/upload/v1710000000/items/shoes-1.jpg",
-        public_id: "items/shoes-1",
-      },
-      {
-        url: "https://res.cloudinary.com/demo/image/upload/v1710000000/items/shoes-2.jpg",
-        public_id: "items/shoes-2",
-      },
-    ],
-    description: "Blue Adidas running shoes, size 9.",
-    location: "Downtown Park",
-    contactNumber: 7035556789,
-    contactEmail: "finder2@example.com",
-    name: "Anna Smith",
-    claims: [],
-    status: "found",
-    _id: "item_001",
-    createdAt: new Date("2025-11-25T08:15:00Z"),
-    updatedAt: new Date("2025-12-02T16:20:00Z"),
-  },
-  {
-    itemname: "Blue Adidas Shoes",
-    isFound: "Found",
-    User: {
-      username: "anna",
-      password: "hashed_password_here",
-      email: "anna@example.com",
-      verificationCode: "912384",
-      verificationCodeExpires: new Date("2025-12-25T23:59:59Z"),
-      isVerified: true,
-      role: "user",
-      profileImage: {
-        url: "https://res.cloudinary.com/demo/image/upload/v1700000000/profile2.jpg",
-        public_id: "profile_1700000001",
-      },
-    },
-    mainImage: {
-      url: "https://res.cloudinary.com/demo/image/upload/v1710000000/items/shoes-main.jpg",
-      public_id: "items/shoes-main",
-    },
-    images: [
-      {
-        url: "https://res.cloudinary.com/demo/image/upload/v1710000000/items/shoes-1.jpg",
-        public_id: "items/shoes-1",
-      },
-      {
-        url: "https://res.cloudinary.com/demo/image/upload/v1710000000/items/shoes-2.jpg",
-        public_id: "items/shoes-2",
-      },
-    ],
-    description: "Blue Adidas running shoes, size 9.",
-    location: "Downtown Park",
-    contactNumber: 7035556789,
-    contactEmail: "finder2@example.com",
-    name: "Anna Smith",
-    claims: [],
-    status: "found",
-    _id: "item_002",
-    createdAt: new Date("2025-11-25T08:15:00Z"),
-    updatedAt: new Date("2025-12-02T16:20:00Z"),
-  },
-  {
-    itemname: "Blue Adidas Shoes",
-    isFound: "Found",
-    User: {
-      username: "anna",
-      password: "hashed_password_here",
-      email: "anna@example.com",
-      verificationCode: "912384",
-      verificationCodeExpires: new Date("2025-12-25T23:59:59Z"),
-      isVerified: true,
-      role: "user",
-      profileImage: {
-        url: "https://res.cloudinary.com/demo/image/upload/v1700000000/profile2.jpg",
-        public_id: "profile_1700000001",
-      },
-    },
-    mainImage: {
-      url: "https://res.cloudinary.com/demo/image/upload/v1710000000/items/shoes-main.jpg",
-      public_id: "items/shoes-main",
-    },
-    images: [
-      {
-        url: "https://res.cloudinary.com/demo/image/upload/v1710000000/items/shoes-1.jpg",
-        public_id: "items/shoes-1",
-      },
-      {
-        url: "https://res.cloudinary.com/demo/image/upload/v1710000000/items/shoes-2.jpg",
-        public_id: "items/shoes-2",
-      },
-    ],
-    description: "Blue Adidas running shoes, size 9.",
-    location: "Downtown Park",
-    contactNumber: 7035556789,
-    contactEmail: "finder2@example.com",
-    name: "Anna Smith",
-    claims: [],
-    status: "found",
-    _id: "item_003",
-    createdAt: new Date("2025-11-25T08:15:00Z"),
-    updatedAt: new Date("2025-12-02T16:20:00Z"),
-  },
-];
 
 export const ReportPage = (props: ReportProps) => {
+  const { token } = useUser();
+
+  const [Data, setData] = useState<ItemProps[]>([]);
+
+  useEffect(() => {
+    if (!token) return;
+
+    getItems<ItemProps[]>("/item", token).then(setData).catch(console.error);
+  }, [token]);
+  console.log(token);
   const [searchTerm, setSearchTerm] = useState("");
   const filterData = Data.filter(
     (item) =>
@@ -244,9 +49,7 @@ export const ReportPage = (props: ReportProps) => {
         <div className="w-full max-w-7xl p-4 rounded-lg">
           <div className="flex flex-wrap justify-center gap-4">
             {filterData.length > 0 ? (
-              filterData.map((item) => (
-                <ReportCard key={item._id} {...item} />
-              ))
+              filterData.map((item) => <ReportCard key={item._id} {...item} />)
             ) : (
               <p className="text-gray-500 mt-10">
                 No items found matching "{searchTerm}"

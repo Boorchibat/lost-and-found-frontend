@@ -42,7 +42,6 @@ export const ReportCard = (props: ItemProps) => {
         )}
       </div>
 
-      {/* Description and location */}
       <div className="h-[50%] w-full p-4 flex flex-col justify-between">
         <div>
           <h1 className="font-semibold">Location:</h1>
