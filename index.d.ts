@@ -1,23 +1,46 @@
-type Image = {
+
+export type Image = {
   url: string;
   public_id: string;
 };
 
-type User = {
+export type ClaimType = {
+  id: string;
+  name: string;
+  claim: string;
+  email: string;
+  number: string;
+  user?: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type User = {
   username: string;
   password: string;
   email: string;
-  verificationCode: string;
-  verificationCodeExpires: Date;
-  isVerified: boolean;
   role: string;
   profileImage: Image;
+  name: string;
+  number: string;
+  createdAt: string;
+  _id: string;
+};
+export type UserProp = {
+  username: string;
+  password: string;
+  role: string;
+  profileImage: Image;
+  name: string;
+  number: string;
+  email: string;
 };
 
-type ItemProps = {
+export type ItemProps = {
+  _id: string;
   itemname: string;
   isFound: string;
-  User: User;
+  user: User;
   mainImage: Image;
   images: Image[];
   description: string;
@@ -25,16 +48,17 @@ type ItemProps = {
   contactNumber: number;
   contactEmail: string;
   name: string;
-  claims: string[];
+  claims: ClaimType[];
   status: string;
-  _id: string;
   createdAt: Date;
   updatedAt: Date;
 };
-type SearchBar = {
-  setQuery: string;
+
+export type SearchBarProps = {
+  setQuery: (value: string) => void;
 };
-type SignupPayload = {
+
+export type SignupPayload = {
   name: string;
   email: string;
   number: string;
@@ -42,7 +66,8 @@ type SignupPayload = {
   password: string;
   profileImage: string;
 };
- type SignupResponse = {
+
+export type SignupResponse = {
   success: boolean;
   token: string;
   user: {
@@ -52,22 +77,13 @@ type SignupPayload = {
     isVerified: boolean;
   };
 };
- type SignInPayload = {
+
+export type SignInPayload = {
   email: string;
   password: string;
 };
 
- type SignInResponse = {
-  success: boolean;
-  token: string;
-  user: {
-    _id: string;
-    username: string;
-    email: string;
-    isVerified: boolean;
-  };
-};
-type SignInResponse =  {
+export type SignInResponse = {
   success: boolean;
   token?: string;
   user?: {
@@ -75,4 +91,5 @@ type SignInResponse =  {
     username: string;
     email: string;
     isVerified: boolean;
-  }}
+  };
+};

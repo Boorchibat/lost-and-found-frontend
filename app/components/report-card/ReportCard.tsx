@@ -30,7 +30,6 @@ export const ReportCard = ({
   isFound: "Found" | "In progress";
 }) => {
   const { user, token } = useUser();
-  console.log(token)
   const [mainImage, setMainImage] = useState<File | null>(null);
   const [uploadMessage, setUploadMessage] = useState("");
 

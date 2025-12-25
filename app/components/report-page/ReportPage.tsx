@@ -4,6 +4,7 @@ import { Searchbar } from "./components/search/Searchbar";
 import { ReportCard } from "./components/card/ReportCard";
 import { useEffect, useState } from "react";
 import { useUser } from "@/app/context/UserContext";
+import { ItemProps } from "@/index";
 import { getItems } from "@/lib/getDataFromBackend";
 
 type ReportProps = {
@@ -20,7 +21,7 @@ export const ReportPage = (props: ReportProps) => {
 
     getItems<ItemProps[]>("/item", token).then(setData).catch(console.error);
   }, [token]);
-  console.log(token);
+
   const [searchTerm, setSearchTerm] = useState("");
   const filterData = Data.filter(
     (item) =>

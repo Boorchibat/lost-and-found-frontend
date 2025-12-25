@@ -1,39 +1,63 @@
-"use client"
+"use client";
 import { ReportCard } from "../components/report-page/components/card/ReportCard";
 import { EditProfile } from "../components/profile/EditProfile";
 import { useUser } from "../context/UserContext";
 import { useEffect, useState } from "react";
-import { getItems } from "@/lib/getDataFromBackend";
 import { getItemz } from "@/lib/item/getItem";
+import { ItemProps } from "@/index";
+import { getSingleUser } from "@/lib/auth/getUser";
+import CircularProgress from "@mui/material/CircularProgress";
 
 const page = () => {
-  const { token, user  } = useUser();
-const [Data, setData] = useState<ItemProps[]>([]);
+  const { token, user } = useUser();
+  const [Data, setData] = useState<ItemProps[]>([]);
+  const [userData, setUserData] = useState<any>(null);
+  const [itemsLoading, setItemsLoading] = useState(true);
+  const [userLoading, setUserLoading] = useState(true);
 
-useEffect(() => {
-  if (!token || !user?._id) return;
+  useEffect(() => {
+    if (!token || !user?._id) return;
+    setItemsLoading(false);
 
-  getItemz<ItemProps[]>(user._id, token)
-    .then(setData)
-    .catch(console.error);
-}, [token, user?._id]);
+    getItemz<ItemProps[]>(user._id, token).then(setData).catch(console.error);
+  }, [token, user?._id]);
 
+  useEffect(() => {
+    if (!token || !user?._id) return;
 
+    setUserLoading(false);
+    const fetchUser = async () => {
+      try {
+        const data = await getSingleUser(user._id, token);
+        setUserData(data);
+      } catch (error) {
+        console.error("Error retrieving user data", error);
+      }
+    };
+
+    fetchUser();
+  }, [token, user?._id]);
+  console.log(userData);
   return (
     <div className="w-full bg-gradient-to-r from-yellow-500 to-blue-500 flex flex-col h-auto justify-center items-center">
       <h1 className="font-bold text-[40px] mt-[30px]">Profile</h1>
-      <EditProfile />
+      {itemsLoading ? (
+        <CircularProgress />
+      ) : (
+        <EditProfile userData={userData} />
+      )}
       <div className="mt-10 w-[70%]">
         <h1 className="font-bold text-[30px]">User's listed items:</h1>
       </div>
-     <div className="w-[70%] flex rounded-md h-auto mt-[50px] mb-[50px] justify-between flex-wrap">
-  {Data.length > 0 ? (
-    Data.map((item) => (
-      <ReportCard key={item._id} {...item} />
-    ))
-  ) : <div>User has no listed Items</div>}
-</div>
-
+      <div className="w-[70%] flex rounded-md h-auto mt-[50px] mb-[50px] justify-between flex-wrap">
+        {userLoading ? (
+          <CircularProgress />
+        ) : Data.length > 0 ? (
+          Data.map((item) => <ReportCard key={item._id} {...item} />)
+        ) : (
+          <div>User has no listed Items</div>
+        )}
+      </div>
     </div>
   );
 };

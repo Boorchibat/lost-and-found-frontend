@@ -1,6 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { ItemProps } from "@/index";
 import Image from "next/image";
 
 export const ReportCard = (props: ItemProps) => {
@@ -9,8 +10,8 @@ export const ReportCard = (props: ItemProps) => {
       <div className="h-[18%] w-full">
         <div className="p-4 flex items-center gap-x-5">
           <Image
-            src={props.User?.profileImage?.url || "/user.svg"}
-            alt={props.User?.username || "Loading user"}
+            src={props.user?.profileImage?.url || "/user.svg"}
+            alt={props.user?.username || "Loading user"}
             width={40}
             height={40}
             className="rounded-xl bg-red-100"
@@ -42,6 +43,7 @@ export const ReportCard = (props: ItemProps) => {
         )}
       </div>
 
+      {/* Description and location */}
       <div className="h-[50%] w-full p-4 flex flex-col justify-between">
         <div>
           <h1 className="font-semibold">Location:</h1>

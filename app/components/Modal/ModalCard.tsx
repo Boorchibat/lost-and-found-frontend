@@ -2,11 +2,13 @@
 import Modal from "@mui/material/Modal";
 import Box from "@mui/material/Box";
 import { ReportCard } from "../report-page/components/card/ReportCard";
+import { ItemProps } from "@/index";
 
 type ModalProps = {
   open: boolean;
   handleClose: () => void;
   handleOpen: () => void;
+  data: ItemProps
 };
 const style = {
   position: "absolute" as "absolute",
@@ -19,9 +21,7 @@ const style = {
 };
 
 export const ModalCard = (props: ModalProps) => {
-  const { open, handleClose } = props;
-
-
+  const { open, handleClose, data } = props;
   return (
     <div className="flex bg-gradient-to-r from-yellow-500 to-blue-400">
       <Modal
@@ -32,7 +32,7 @@ export const ModalCard = (props: ModalProps) => {
       >
         <Box sx={style}>
           <div className="flex flex-col w-full items-center p-5">
-            <ReportCard/>
+            <ReportCard {...data}/>
           </div>
         </Box>
       </Modal>
