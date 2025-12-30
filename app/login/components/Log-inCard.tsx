@@ -21,9 +21,12 @@ export const LoginCard = () => {
     <Formik
       initialValues={{ email: "", password: "" }}
       validationSchema={LoginSchema}
-      onSubmit={async (values: SignInPayload, { setSubmitting }) => {
+      onSubmit={async (
+        values: SignInPayload,
+        { setSubmitting, setFieldError }
+      ) => {
         try {
-          const data = await signIn(values); 
+          const data = await signIn(values);
 
           if (!data.token || !data.user)
             throw new Error("Invalid login response");
@@ -37,7 +40,10 @@ export const LoginCard = () => {
           router.push("/");
         } catch (error: any) {
           console.error("LOGIN ERROR:", error);
-          alert(error?.message || "Login failed");
+
+          const backendMessage =
+            error?.response?.data?.message || error?.message || "Login failed";
+          setFieldError("password", backendMessage);
         } finally {
           setSubmitting(false);
         }
@@ -73,6 +79,10 @@ export const LoginCard = () => {
               {isSubmitting ? "Signing in..." : "Sign in"}
             </Button>
           </div>
+
+          <a href="/signup">
+            <h1 className="mt-[30px] underline">Dont have an account yet?</h1>
+          </a>
         </Form>
       )}
     </Formik>

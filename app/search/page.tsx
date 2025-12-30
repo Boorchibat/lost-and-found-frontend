@@ -6,21 +6,21 @@ import { Button } from "@/components/ui/button";
 import { getItems } from "@/lib/getDataFromBackend";
 import { useUser } from "../context/UserContext";
 import { LoaderCircle } from "lucide-react";
+import { ItemProps } from "@/index";
 
 export const Search = () => {
-  const { token, loading } = useUser();
+  const { loading } = useUser();
 
   const [Data, setData] = useState<ItemProps[]>([]);
 
   useEffect(() => {
-    if (!token) return;
 
-    getItems<ItemProps[]>("/item", token).then(setData).catch(console.error);
-  }, [token]);
-  console.log(token);
+    getItems<ItemProps[]>("/item").then(setData).catch(console.error);
+  }, []);
 
   const [searchTerm, setSearchTerm] = useState("");
-  const filterData = Data.filter(
+  const approvedData = Data.filter((item) => item.status === "approved");
+  const filterData = approvedData.filter(
     (item) =>
       item.itemname.toLowerCase().includes(searchTerm.toLowerCase()) ||
       item.description.toLowerCase().includes(searchTerm.toLocaleLowerCase())

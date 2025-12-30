@@ -32,6 +32,9 @@ export const ReportCard = ({
   const { user, token } = useUser();
   const [mainImage, setMainImage] = useState<File | null>(null);
   const [uploadMessage, setUploadMessage] = useState("");
+  if(!token || !user){
+    return <div className="bg-red-100 h-screen">no user found</div>
+  }
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];

@@ -1,12 +1,13 @@
 "use client";
-import { ReportCard } from "../components/report-page/components/card/ReportCard";
-import { EditProfile } from "../components/profile/EditProfile";
-import { useUser } from "../context/UserContext";
+
 import { useEffect, useState } from "react";
 import { getItemz } from "@/lib/item/getItem";
 import { ItemProps } from "@/index";
 import { getSingleUser } from "@/lib/auth/getUser";
 import CircularProgress from "@mui/material/CircularProgress";
+import { useUser } from "@/app/context/UserContext";
+import { EditProfile } from "@/app/components/profile/EditProfile";
+import { ReportCard } from "@/app/components/report-page/components/card/ReportCard";
 
 const page = () => {
   const { token, user } = useUser();
@@ -16,19 +17,19 @@ const page = () => {
   const [userLoading, setUserLoading] = useState(true);
 
   useEffect(() => {
-    if (!token || !user?._id) return;
+    if ( !user?._id) return;
     setItemsLoading(false);
 
-    getItemz<ItemProps[]>(user._id, token).then(setData).catch(console.error);
-  }, [token, user?._id]);
+    getItemz<ItemProps[]>(user._id).then(setData).catch(console.error);
+  }, [ user?._id]);
 
   useEffect(() => {
-    if (!token || !user?._id) return;
+    if (!user?._id) return;
 
     setUserLoading(false);
     const fetchUser = async () => {
       try {
-        const data = await getSingleUser(user._id, token);
+        const data = await getSingleUser(user._id);
         setUserData(data);
       } catch (error) {
         console.error("Error retrieving user data", error);
@@ -37,7 +38,6 @@ const page = () => {
 
     fetchUser();
   }, [token, user?._id]);
-  console.log(userData);
   return (
     <div className="w-full bg-gradient-to-r from-yellow-500 to-blue-500 flex flex-col h-auto justify-center items-center">
       <h1 className="font-bold text-[40px] mt-[30px]">Profile</h1>

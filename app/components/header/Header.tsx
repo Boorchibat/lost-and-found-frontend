@@ -11,24 +11,56 @@ import {
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useUser } from "../../context/UserContext";
+import { useEffect, useState } from "react";
+import { getSingleUser } from "@/lib/auth/getUser";
+import CircularProgress from "@mui/material/CircularProgress";
 
 export const Header = () => {
+  const router = useRouter();
+  const { user, token, logout } = useUser();
+
+  const [userLoading, setUserLoading] = useState(true);
+  const [userData, setUserData] = useState<any>(null);
+
+  const handleSignIn = () => {
+    router.push("/login");
+  };
+
+  useEffect(() => {
+    if (!user?._id) {
+      setUserLoading(false);
+      return;
+    }
+
+    const fetchUser = async () => {
+      try {
+        const data = await getSingleUser(user._id);
+        setUserData(data);
+      } catch (error) {
+        console.error("Error retrieving user data", error);
+      } finally {
+        setUserLoading(false);
+      }
+    };
+
+    fetchUser();
+  }, [token, user?._id]);
+
+  const isAdmin = userData?.role === "admin";
+
   const menuItems = [
     { label: "Home", href: "/" },
     { label: "Lost", href: "/lost" },
     { label: "Report Lost", href: "/report-lost" },
     { label: "Found", href: "/found" },
     { label: "Report Found", href: "/report-found" },
-    { label: "Profile", href: "/account-info" },
-    { label: "Search", href: "/search" },
+    ...(user
+      ? [
+          { label: "Profile", href: `/account-info/${user._id}` },
+          { label: "Search", href: "/search" },
+        ]
+      : []),
   ];
-
-  const router = useRouter();
-  const { user, logout } = useUser();
-
-  const handleSignIn = () => {
-    router.push("/login");
-  };
 
   return (
     <header className="w-full bg-gradient-to-r from-blue-300 to-yellow-300 shadow-md">
@@ -38,11 +70,23 @@ export const Header = () => {
         </div>
 
         <nav className="hidden md:flex items-center gap-2">
-          {menuItems.map((item) => (
-            <Link key={item.href} href={item.href} className="inline-block">
-              <Button variant="ghost">{item.label}</Button>
-            </Link>
-          ))}
+          {userLoading ? (
+            <CircularProgress size={24} className="mx-4" />
+          ) : (
+            <>
+              {isAdmin && user && (
+                <Link href={`/admin/${user._id}`} className="inline-block">
+                  <Button variant="ghost">Admin</Button>
+                </Link>
+              )}
+
+              {menuItems.map((item) => (
+                <Link key={item.href} href={item.href} className="inline-block">
+                  <Button variant="ghost">{item.label}</Button>
+                </Link>
+              ))}
+            </>
+          )}
         </nav>
 
         <div className="hidden md:flex ml-[30px]">
@@ -62,6 +106,7 @@ export const Header = () => {
             </Button>
           )}
         </div>
+
         <div className="md:hidden flex items-center">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -71,13 +116,19 @@ export const Header = () => {
               side="bottom"
               className="w-40 animate-in fade-in-0 slide-in-from-top-2 animate-out fade-out-0 slide-out-to-top-2 duration-300"
             >
-              {menuItems.map((item) => (
-                <DropdownMenuItem key={item.href}>
-                  <Link href={item.href} className="w-full block">
-                    {item.label}
-                  </Link>
-                </DropdownMenuItem>
-              ))}
+              {userLoading ? (
+                <div className="flex justify-center p-2">
+                  <CircularProgress size={24} />
+                </div>
+              ) : (
+                menuItems.map((item) => (
+                  <DropdownMenuItem key={item.href}>
+                    <Link href={item.href} className="w-full block">
+                      {item.label}
+                    </Link>
+                  </DropdownMenuItem>
+                ))
+              )}
 
               <DropdownMenuItem>
                 {user ? (

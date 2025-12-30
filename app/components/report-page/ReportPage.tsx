@@ -1,35 +1,27 @@
 "use client";
+
 import { Button } from "@/components/ui/button";
 import { Searchbar } from "./components/search/Searchbar";
 import { ReportCard } from "./components/card/ReportCard";
-import { useEffect, useState } from "react";
-import { useUser } from "@/app/context/UserContext";
+import { useState } from "react";
 import { ItemProps } from "@/index";
-import { getItems } from "@/lib/getDataFromBackend";
 
 type ReportProps = {
-  title: String;
+  title: string;
+  Data?: ItemProps[];
 };
 
-export const ReportPage = (props: ReportProps) => {
-  const { token } = useUser();
-
-  const [Data, setData] = useState<ItemProps[]>([]);
-
-  useEffect(() => {
-    if (!token) return;
-
-    getItems<ItemProps[]>("/item", token).then(setData).catch(console.error);
-  }, [token]);
-
+export const ReportPage = ({ title, Data = [] }: ReportProps) => {
   const [searchTerm, setSearchTerm] = useState("");
-  const filterData = Data.filter(
+
+  const approvedData = Data.filter((item) => item.status === "approved");
+
+  const filterData = approvedData.filter(
     (item) =>
       item.itemname.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.description.toLowerCase().includes(searchTerm.toLocaleLowerCase())
+      item.description.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const title = props.title;
   return (
     <div className="w-full flex flex-col items-center px-4 py-8 md:py-12">
       <div className="w-full max-w-5xl flex flex-col items-center mb-8">

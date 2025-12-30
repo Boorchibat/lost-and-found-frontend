@@ -28,7 +28,7 @@ export type User = {
 };
 export type UserProp = {
   username: string;
-  password: string;
+  password?: string;
   role: string;
   profileImage: Image;
   name: string;
@@ -40,7 +40,7 @@ export type ItemProps = {
   _id: string;
   itemname: string;
   isFound: string;
-  user: User;
+  User: User;
   mainImage: Image;
   images: Image[];
   description: string;
@@ -93,3 +93,20 @@ export type SignInResponse = {
     isVerified: boolean;
   };
 };
+export type UpdateItemPayload = Partial<{
+  itemname: string;
+  location: string;
+  description: string;
+  contactNumber: number;
+  contactEmail: string;
+  mainImage: {
+    url: string;
+    public_id: string;
+  };
+  images: {
+    url: string;
+    public_id: string;
+  }[];
+  isFound: boolean;
+}>;
+
