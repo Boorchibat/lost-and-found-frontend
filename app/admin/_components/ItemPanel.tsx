@@ -15,7 +15,7 @@ type ItemPanelProps = {
 
 export const ItemPanel = ({ data, onUpdate }: ItemPanelProps) => {
   const [open, setOpen] = useState(false);
-  const [feedback, setFeedback] = useState<null | "approved" | "rejected">(null);
+  const [feedback, setFeedback] = useState<null | "accepted" | "rejected">(null);
   const { token } = useUser();
   const itemId = data._id;
 
@@ -23,7 +23,7 @@ export const ItemPanel = ({ data, onUpdate }: ItemPanelProps) => {
     if (!token) return;
     try {
       await approveItem(itemId, token);
-      setFeedback("approved");
+      setFeedback("accepted");
       setTimeout(() => setFeedback(null), 5000);
       onUpdate(itemId);
     } catch (err) {
@@ -73,7 +73,7 @@ export const ItemPanel = ({ data, onUpdate }: ItemPanelProps) => {
 
           {feedback && (
             <span className="absolute top-0 right-0 text-2xl">
-              {feedback === "approved" ? "✅" : "❌"}
+              {feedback === "accepted" ? "✅" : "❌"}
             </span>
           )}
         </div>

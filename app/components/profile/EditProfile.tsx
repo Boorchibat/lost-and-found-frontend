@@ -22,18 +22,18 @@ export const EditProfile = (userData: EditProfileProps) => {
   const handleClose = () => setOpen(false);
   const handleOpenDelete = () => setOpenDelete(true);
   const handleCloseDelete = () => setOpenDelete(false);
-  console.log(Data);
   const handleDelete = async () => {
     if (!token || !Data?._id) return;
     try {
       await DeleteUser(Data?._id, token);
       handleCloseDelete();
       logout();
+      
     } catch (err) {
       console.error(err);
     }
   };
-  console.log(Data?._id, token)
+  console.log(userData)
   return (
     <div className="w-[90%] lg:w-[50%] mt-[40px] h-[700px] flex flex-col rounded-md border-2 border-black items-center">
       <div className="w-full flex items-center justify-center mt-[50px] relative py-4">

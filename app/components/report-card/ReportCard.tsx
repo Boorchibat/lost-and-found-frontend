@@ -30,27 +30,46 @@ export const ReportCard = ({
   isFound: "Found" | "In progress";
 }) => {
   const { user, token } = useUser();
-  const [mainImage, setMainImage] = useState<File | null>(null);
+
+  const [images, setImages] = useState<File[]>([]);
   const [uploadMessage, setUploadMessage] = useState("");
-  if(!token || !user){
-    return <div className="bg-red-100 h-screen">no user found</div>
+
+  if (!user || !token) {
+    return (
+      <div className="h-screen flex items-center justify-center">
+        No user found
+      </div>
+    );
   }
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) {
-      setUploadMessage("");
-      return;
-    }
-    if (!file.type.startsWith("image/")) {
-      setUploadMessage("❌ File must be an image.");
-      return;
-    }
-    setMainImage(file);
-    setUploadMessage("✅ Image selected!");
-  };
+    const files = Array.from(e.target.files || []);
 
-  if (!user || !token) return <p>Loading...</p>;
+    if (files.length === 0) return;
+
+    const invalid = files.find((file) => !file.type.startsWith("image/"));
+    if (invalid) {
+      setUploadMessage("❌ All files must be images");
+      return;
+    }
+
+    setImages((prev) => {
+      const combined = [...prev, ...files];
+
+      // remove duplicates (same name + size)
+      const unique = combined.filter(
+        (file, index, self) =>
+          index ===
+          self.findIndex((f) => f.name === file.name && f.size === file.size)
+      );
+
+      return unique;
+    });
+
+    setUploadMessage("✅ Image(s) added");
+
+    e.target.value = "";
+  };
 
   return (
     <Formik
@@ -65,14 +84,17 @@ export const ReportCard = ({
       }}
       validationSchema={ReportSchema}
       onSubmit={async (values, { setSubmitting, resetForm }) => {
-        if (!mainImage) {
-          alert("Please upload an image");
+        if (images.length === 0) {
+          alert("Please upload at least one image");
           return;
         }
 
         try {
           setSubmitting(true);
-          const cloudData = await uploadToCloudinary(mainImage);
+
+          const uploadedImages = await Promise.all(
+            images.map((img) => uploadToCloudinary(img))
+          );
 
           const payload = {
             name: values.name,
@@ -84,20 +106,23 @@ export const ReportCard = ({
             contactEmail: values.contactEmail,
             User: user._id,
             isFound,
+
             mainImage: {
-              url: cloudData.secure_url,
-              public_id: cloudData.public_id,
+              url: uploadedImages[0].secure_url,
+              public_id: uploadedImages[0].public_id,
             },
-            images: [
-              { url: cloudData.secure_url, public_id: cloudData.public_id },
-            ],
+
+            images: uploadedImages.map((img) => ({
+              url: img.secure_url,
+              public_id: img.public_id,
+            })),
           };
 
           await PostItem(payload, token);
 
           alert("Item reported successfully!");
           resetForm();
-          setMainImage(null);
+          setImages([]);
           setUploadMessage("");
         } catch (error: any) {
           console.error(error);
@@ -112,7 +137,7 @@ export const ReportCard = ({
       }}
     >
       {({ isSubmitting, handleChange, values, errors, touched }) => (
-        <Form className="w-[70%] lg:w-[60%] flex flex-col items-center justify-center gap-6 bg-yellow-100 rounded-2xl p-6 mt-6">
+        <Form className="w-[70%] lg:w-[60%] flex flex-col items-center gap-6 bg-yellow-100 rounded-2xl p-6 mt-6">
           {[
             { label: "Name", name: "name", type: "text" },
             { label: "Item", name: "itemname", type: "text" },
@@ -124,17 +149,15 @@ export const ReportCard = ({
           ].map((field) => (
             <div
               key={field.name}
-              className="w-full flex flex-col sm:flex-row items-center justify-center gap-4"
+              className="w-full flex flex-col sm:flex-row items-center gap-4"
             >
-              <h1 className="font-bold text-lg sm:text-xl md:text-2xl w-32">
-                {field.label}:
-              </h1>
+              <h1 className="font-bold text-lg w-32">{field.label}:</h1>
               <Input
                 type={field.type}
                 name={field.name}
                 value={(values as any)[field.name]}
                 onChange={handleChange}
-                className="w-full sm:w-3/5 md:w-2/3"
+                className="w-full sm:w-2/3"
               />
               {touched[field.name as keyof typeof touched] &&
                 errors[field.name as keyof typeof errors] && (
@@ -144,16 +167,14 @@ export const ReportCard = ({
                 )}
             </div>
           ))}
-
-          <div className="w-full flex flex-col sm:flex-row items-center justify-center gap-4">
-            <h1 className="font-bold text-lg sm:text-xl md:text-2xl w-32">
-              Upload Photo:
-            </h1>
-            <div className="flex flex-col w-full sm:w-3/5 md:w-2/3">
+          <div className="w-full flex flex-col sm:flex-row items-center gap-4">
+            <h1 className="font-bold text-lg w-32">Upload Photos:</h1>
+            <div className="flex flex-col w-full sm:w-2/3">
               <input
                 id="upload"
                 type="file"
                 accept="image/*"
+                multiple
                 onChange={handleFileUpload}
                 className="hidden"
               />
@@ -162,8 +183,9 @@ export const ReportCard = ({
                 className="flex items-center justify-center gap-2 border border-gray-500 rounded-md p-2 cursor-pointer"
               >
                 <Image src="/upload.svg" alt="Upload" width={30} height={30} />
-                Upload Image
+                Upload Images
               </label>
+
               {uploadMessage && (
                 <p
                   className={`mt-2 font-semibold ${
@@ -177,18 +199,24 @@ export const ReportCard = ({
               )}
             </div>
           </div>
+          {images.length > 0 && (
+            <p className="text-sm font-semibold text-gray-700">
+              📸 {images.length} image{images.length > 1 ? "s" : ""} selected
+            </p>
+          )}
 
-          <div className="flex flex-col sm:flex-row gap-6 mt-4 w-full justify-center items-center">
+          <div className="flex flex-col sm:flex-row gap-6 mt-4">
             <Button
               type="submit"
-              className="w-full sm:w-44 h-12 hover:bg-green-400 hover:text-black"
+              className="w-44 h-12 hover:bg-green-400 hover:text-black"
               disabled={isSubmitting}
             >
               {isSubmitting ? "Reporting..." : "Submit"}
             </Button>
+
             <Button
               type="reset"
-              className="w-full sm:w-44 h-12 bg-white text-black hover:bg-red-400 hover:text-white"
+              className="w-44 h-12 bg-white text-black hover:bg-red-400 hover:text-white"
               onClick={() => window.location.reload()}
             >
               Reset

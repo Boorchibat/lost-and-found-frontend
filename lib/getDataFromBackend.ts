@@ -1,6 +1,9 @@
 import { axiosInstance } from "../lib/axios-instance";
 
-export const getData = async <T>(endpoint: string, payload?: any): Promise<T> => {
+export const getData = async <T>(
+  endpoint: string,
+  payload?: any
+): Promise<T> => {
   const res = await fetch(endpoint, {
     method: "GET",
     headers: { "Content-Type": "application/json" },
@@ -71,31 +74,26 @@ export const updateItemStatus = async <T, D>(
   return data;
 };
 
-export const getItems = async <T>(
+export const getItems = async <T>(endpoint: string): Promise<T> => {
+  const { data } = await axiosInstance.get<T>(endpoint);
+
+  return data;
+};
+export const getClaims = async <T>(endpoint: string): Promise<T> => {
+  const { data } = await axiosInstance.get<T>(endpoint);
+
+  return data;
+};
+
+export const getClaim = async <T>(
   endpoint: string,
+  token: string
 ): Promise<T> => {
-  const { data } = await axiosInstance.get<T>(endpoint);
-
-  return data;
-};
-
-export const getUser = async <T>(
-  endpoint: string
-): Promise<T> => {
- 
-
-  const { data } = await axiosInstance.get<T>(endpoint);
-
-  return data;
-};
-
-export const getItem = async <T>(endpoint: string, token: string): Promise<T> => {
-
   if (!token) throw new Error("Authentication token is required");
 
   const { data } = await axiosInstance.get<T>(endpoint, {
     headers: {
-      Authorization: `Bearer ${token}`, 
+      Authorization: `Bearer ${token}`,
       "Content-Type": "application/json",
     },
   });
@@ -103,8 +101,27 @@ export const getItem = async <T>(endpoint: string, token: string): Promise<T> =>
   return data;
 };
 
+export const getUser = async <T>(endpoint: string): Promise<T> => {
+  const { data } = await axiosInstance.get<T>(endpoint);
 
+  return data;
+};
 
+export const getItem = async <T>(
+  endpoint: string,
+  token: string
+): Promise<T> => {
+  if (!token) throw new Error("Authentication token is required");
+
+  const { data } = await axiosInstance.get<T>(endpoint, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+  });
+
+  return data;
+};
 
 export const putData = async <T, D>(
   endpoint: string,

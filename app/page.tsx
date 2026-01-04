@@ -2,8 +2,11 @@
 
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
+import { useUser } from "./context/UserContext";
 
 export const Home = () => {
+  const {token} = useUser()
+  console.log(token)
   return (
     <div className="w-full min-h-screen flex flex-col md:flex-row justify-center items-center bg-gradient-to-r from-yellow-500 to-blue-500 px-4 md:px-16 py-10">
       <div className="flex flex-col w-full md:w-1/2 mb-10 md:mb-0 text-center md:text-left">

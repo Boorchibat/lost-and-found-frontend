@@ -48,7 +48,7 @@ export type ItemProps = {
   contactNumber: number;
   contactEmail: string;
   name: string;
-  claims: ClaimType[];
+  claims: string[];
   status: string;
   createdAt: Date;
   updatedAt: Date;
@@ -109,4 +109,8 @@ export type UpdateItemPayload = Partial<{
   }[];
   isFound: boolean;
 }>;
+type GetClaimProp = {
+  claimId: string,
+  token: string,
+}
 

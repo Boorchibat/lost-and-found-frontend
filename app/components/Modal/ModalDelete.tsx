@@ -7,6 +7,7 @@ type ModalProps = {
   open: boolean;
   handleClose: () => void;
   deleteType: () => void;
+  error?: string | null;
 };
 
 const style = {
@@ -20,7 +21,7 @@ const style = {
   backgroundColor: "white",
 };
 
-export const ModalDelete = ({ open, handleClose, deleteType }: ModalProps) => {
+export const ModalDelete = ({ open, handleClose, deleteType, error }: ModalProps) => {
   const handleConfirm = () => {
     deleteType();
     handleClose();
@@ -35,12 +36,21 @@ export const ModalDelete = ({ open, handleClose, deleteType }: ModalProps) => {
     >
       <Box sx={style}>
         <div className="flex flex-col w-full items-center p-5 gap-4">
-          <h1 className="text-lg font-bold">Are you sure you want to delete?</h1>
+          <h1 className="text-lg font-bold">
+            Are you sure you want to delete?
+          </h1>
+          <h1>{error}</h1>
           <div className="flex gap-[50px]">
-            <Button onClick={handleConfirm} className="bg-red-500 hover:bg-red-600">
+            <Button
+              onClick={handleConfirm}
+              className="bg-red-500 hover:bg-red-600"
+            >
               Yes, Delete
             </Button>
-            <Button onClick={handleClose} className="bg-gray-300 text-black hover:bg-gray-400">
+            <Button
+              onClick={handleClose}
+              className="bg-gray-300 text-black hover:bg-gray-400"
+            >
               Cancel
             </Button>
           </div>
