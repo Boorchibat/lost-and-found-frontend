@@ -31,7 +31,7 @@ export const Search = () => {
         <h1 className="mb-[20px] font-bold text-[40px]">Search for an Item</h1>
         <Searchbar setQuery={setSearchTerm} />
       </div>
-      <div className="mt-[30px] gap-x-20 flex flex-wrap w-[70%] mb-[30px]">
+      <div className="mt-[30px] gap-x-15 flex justify-center items-center flex flex-wrap w-[70%] mb-[30px]">
         {loading ? (
           <div className="w-full flex justify-center items-center mt-[40px]">
             <LoaderCircle size={60} color="#2563eb" />

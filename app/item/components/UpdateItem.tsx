@@ -9,7 +9,7 @@ import { Formik, Form, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import { useUser } from "@/app/context/UserContext";
 import { uploadToCloudinary } from "@/lib/cloudinary/UploadToCloudinary";
-import { ItemProps, Image as ImageType } from "@/index";
+import { ItemProps, Image as ImageType, ItemPropz } from "@/index";
 import { UpdateItem } from "@/lib/item/updateItem";
 import Image from "next/image";
 

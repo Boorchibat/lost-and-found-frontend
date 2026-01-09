@@ -9,6 +9,7 @@ import * as Yup from "yup";
 import { PostItem } from "@/lib/item/postItem";
 import { uploadToCloudinary } from "@/lib/cloudinary/UploadToCloudinary";
 import { useUser } from "@/app/context/UserContext";
+import { ArrowLeft, ArrowRight } from "lucide-react";
 
 const ReportSchema = Yup.object().shape({
   name: Yup.string().required("Name is required"),
@@ -30,9 +31,11 @@ export const ReportCard = ({
   isFound: "Found" | "In progress";
 }) => {
   const { user, token } = useUser();
-
   const [images, setImages] = useState<File[]>([]);
+  const [uploadedImages, setUploadedImages] = useState<any[]>([]);
   const [uploadMessage, setUploadMessage] = useState("");
+  const [showModal, setShowModal] = useState(false);
+  const [carouselIndex, setCarouselIndex] = useState(0);
 
   if (!user || !token) {
     return (
@@ -44,7 +47,6 @@ export const ReportCard = ({
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
-
     if (files.length === 0) return;
 
     const invalid = files.find((file) => !file.type.startsWith("image/"));
@@ -55,175 +57,251 @@ export const ReportCard = ({
 
     setImages((prev) => {
       const combined = [...prev, ...files];
-
-      // remove duplicates (same name + size)
       const unique = combined.filter(
         (file, index, self) =>
           index ===
           self.findIndex((f) => f.name === file.name && f.size === file.size)
       );
-
       return unique;
     });
 
     setUploadMessage("✅ Image(s) added");
-
     e.target.value = "";
   };
 
+  const nextImage = () =>
+    setCarouselIndex((prev) => (prev + 1) % uploadedImages.length);
+  const prevImage = () =>
+    setCarouselIndex(
+      (prev) => (prev - 1 + uploadedImages.length) % uploadedImages.length
+    );
+
   return (
-    <Formik
-      initialValues={{
-        name: "",
-        itemname: "",
-        location: "",
-        date: "",
-        description: "",
-        contactNumber: "",
-        contactEmail: "",
-      }}
-      validationSchema={ReportSchema}
-      onSubmit={async (values, { setSubmitting, resetForm }) => {
-        if (images.length === 0) {
-          alert("Please upload at least one image");
-          return;
-        }
+    <>
+      <Formik
+        initialValues={{
+          name: "",
+          itemname: "",
+          location: "",
+          date: "",
+          description: "",
+          contactNumber: "",
+          contactEmail: "",
+        }}
+        validationSchema={ReportSchema}
+        onSubmit={async (values, { setSubmitting, resetForm }) => {
+          if (images.length === 0) {
+            alert("Please upload at least one image");
+            return;
+          }
 
-        try {
-          setSubmitting(true);
+          try {
+            setSubmitting(true);
+            const uploaded = await Promise.all(
+              images.map((img) => uploadToCloudinary(img))
+            );
+            setUploadedImages(uploaded);
 
-          const uploadedImages = await Promise.all(
-            images.map((img) => uploadToCloudinary(img))
-          );
+            const payload = {
+              name: values.name,
+              itemname: values.itemname,
+              location: values.location,
+              date: values.date,
+              description: values.description,
+              contactNumber: Number(values.contactNumber),
+              contactEmail: values.contactEmail,
+              User: user._id,
+              isFound,
+              mainImage: {
+                url: uploaded[0].secure_url,
+                public_id: uploaded[0].public_id,
+              },
+              images: uploaded.map((img) => ({
+                url: img.secure_url,
+                public_id: img.public_id,
+              })),
+            };
 
-          const payload = {
-            name: values.name,
-            itemname: values.itemname,
-            location: values.location,
-            date: values.date,
-            description: values.description,
-            contactNumber: Number(values.contactNumber),
-            contactEmail: values.contactEmail,
-            User: user._id,
-            isFound,
+            await PostItem(payload, token);
 
-            mainImage: {
-              url: uploadedImages[0].secure_url,
-              public_id: uploadedImages[0].public_id,
-            },
+            setShowModal(true);
+            setCarouselIndex(0);
+            resetForm();
+            setImages([]);
+            setUploadMessage("");
+          } catch (error: any) {
+            console.error(error);
+            alert(
+              error?.response?.data?.error ||
+                error?.message ||
+                "Failed to report item"
+            );
+          } finally {
+            setSubmitting(false);
+          }
+        }}
+      >
+        {({ isSubmitting, handleChange, values, errors, touched }) => (
+          <Form className="w-[80%] lg:w-[60%] flex flex-col items-center gap-6 bg-gradient-to-r from-yellow-200 via-yellow-100 to-yellow-200 rounded-3xl p-8 mt-6 shadow-xl border border-yellow-300 animate-fadeIn">
+            <h1 className="text-4xl sm:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-green-500 animate-textGlow mb-6 text-center">
+              Report an Item
+            </h1>
 
-            images: uploadedImages.map((img) => ({
-              url: img.secure_url,
-              public_id: img.public_id,
-            })),
-          };
+            {[
+              { label: "Name", name: "name", type: "text" },
+              { label: "Item", name: "itemname", type: "text" },
+              { label: "Location", name: "location", type: "text" },
+              { label: "Date", name: "date", type: "date" },
+              { label: "Description", name: "description", type: "text" },
+              { label: "Phone", name: "contactNumber", type: "text" },
+              { label: "Email", name: "contactEmail", type: "text" },
+            ].map((field) => (
+              <div
+                key={field.name}
+                className="w-full flex flex-col sm:flex-row items-center gap-4"
+              >
+                <h1 className="font-semibold text-lg w-32">{field.label}:</h1>
+                <Input
+                  type={field.type}
+                  name={field.name}
+                  value={(values as any)[field.name]}
+                  onChange={handleChange}
+                  className="w-full sm:w-2/3 border-2 border-gray-300 focus:border-blue-400 focus:ring focus:ring-blue-200 rounded-md shadow-sm transition-all duration-300"
+                />
+                {touched[field.name as keyof typeof touched] &&
+                  errors[field.name as keyof typeof errors] && (
+                    <p className="text-red-600 text-sm ml-1 mt-1">
+                      <ErrorMessage name={field.name} />
+                    </p>
+                  )}
+              </div>
+            ))}
 
-          await PostItem(payload, token);
-
-          alert("Item reported successfully!");
-          resetForm();
-          setImages([]);
-          setUploadMessage("");
-        } catch (error: any) {
-          console.error(error);
-          alert(
-            error?.response?.data?.error ||
-              error?.message ||
-              "Failed to report item"
-          );
-        } finally {
-          setSubmitting(false);
-        }
-      }}
-    >
-      {({ isSubmitting, handleChange, values, errors, touched }) => (
-        <Form className="w-[70%] lg:w-[60%] flex flex-col items-center gap-6 bg-yellow-100 rounded-2xl p-6 mt-6">
-          {[
-            { label: "Name", name: "name", type: "text" },
-            { label: "Item", name: "itemname", type: "text" },
-            { label: "Location", name: "location", type: "text" },
-            { label: "Date", name: "date", type: "date" },
-            { label: "Description", name: "description", type: "text" },
-            { label: "Phone", name: "contactNumber", type: "text" },
-            { label: "Email", name: "contactEmail", type: "text" },
-          ].map((field) => (
-            <div
-              key={field.name}
-              className="w-full flex flex-col sm:flex-row items-center gap-4"
-            >
-              <h1 className="font-bold text-lg w-32">{field.label}:</h1>
-              <Input
-                type={field.type}
-                name={field.name}
-                value={(values as any)[field.name]}
-                onChange={handleChange}
-                className="w-full sm:w-2/3"
-              />
-              {touched[field.name as keyof typeof touched] &&
-                errors[field.name as keyof typeof errors] && (
-                  <p className="text-red-500 text-sm">
-                    <ErrorMessage name={field.name} />
+            <div className="w-full flex flex-col sm:flex-row items-start gap-4">
+              <h1 className="font-semibold text-lg w-32">Upload Photos:</h1>
+              <div className="flex flex-col w-full sm:w-2/3">
+                <input
+                  id="upload"
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  onChange={handleFileUpload}
+                  className="hidden"
+                />
+                <label
+                  htmlFor="upload"
+                  className="flex items-center justify-center gap-2 border border-gray-400 rounded-lg p-2 cursor-pointer bg-white hover:bg-gradient-to-r hover:from-green-400 hover:to-blue-400 transition-all duration-300 shadow-md"
+                >
+                  <Image
+                    src="/upload.svg"
+                    alt="Upload"
+                    width={30}
+                    height={30}
+                  />
+                  Upload Images
+                </label>
+                {uploadMessage && (
+                  <p
+                    className={`mt-2 font-semibold ${
+                      uploadMessage.includes("❌")
+                        ? "text-red-600"
+                        : "text-green-600"
+                    }`}
+                  >
+                    {uploadMessage}
                   </p>
                 )}
-            </div>
-          ))}
-          <div className="w-full flex flex-col sm:flex-row items-center gap-4">
-            <h1 className="font-bold text-lg w-32">Upload Photos:</h1>
-            <div className="flex flex-col w-full sm:w-2/3">
-              <input
-                id="upload"
-                type="file"
-                accept="image/*"
-                multiple
-                onChange={handleFileUpload}
-                className="hidden"
-              />
-              <label
-                htmlFor="upload"
-                className="flex items-center justify-center gap-2 border border-gray-500 rounded-md p-2 cursor-pointer"
-              >
-                <Image src="/upload.svg" alt="Upload" width={30} height={30} />
-                Upload Images
-              </label>
 
-              {uploadMessage && (
-                <p
-                  className={`mt-2 font-semibold ${
-                    uploadMessage.includes("❌")
-                      ? "text-red-600"
-                      : "text-green-600"
-                  }`}
-                >
-                  {uploadMessage}
-                </p>
+                {images.length > 0 && (
+                  <div className="flex flex-wrap gap-3 mt-4">
+                    {images.map((file, index) => (
+                      <div
+                        key={file.name + index}
+                        className="w-24 h-24 relative rounded-lg overflow-hidden shadow-md border"
+                      >
+                        <Image
+                          src={URL.createObjectURL(file)}
+                          alt={`Selected Image ${index + 1}`}
+                          fill
+                          className="object-cover"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+          
+              </div>
+            </div>
+            <div className="flex flex-col sm:flex-row gap-6 mt-4">
+              <Button
+                type="submit"
+                className="w-44 h-12 bg-gradient-to-r from-green-400 to-blue-500 text-white font-bold hover:scale-105 transition-transform duration-300"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? "Reporting..." : "Submit"}
+              </Button>
+              <Button
+                type="reset"
+                className="w-44 h-12 bg-white text-black border border-gray-400 hover:bg-red-400 hover:text-white transition-all duration-300"
+                onClick={() => window.location.reload()}
+              >
+                Reset
+              </Button>
+            </div>
+          </Form>
+        )}
+      </Formik>
+
+      {showModal && uploadedImages.length > 0 && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50 animate-fadeIn">
+          <div className="bg-white rounded-2xl p-6 flex flex-col items-center gap-4 w-80 shadow-2xl relative animate-slideInUp">
+            <h2 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-green-500 to-blue-500 animate-textGlow">
+              Submitted Successfully!
+            </h2>
+            <p className="text-gray-700 text-center">
+              Your item has been reported. You can view it in your profile.
+            </p>
+
+            <div className="relative w-60 h-60 flex items-center justify-center mt-2">
+              {uploadedImages.length > 1 && (
+                <>
+                  <button
+                    onClick={prevImage}
+                    className="absolute left-0 bg-black/50 text-white p-2 rounded-full z-10 hover:bg-black/70 transition"
+                  >
+                    <ArrowLeft />
+                  </button>
+                  <button
+                    onClick={nextImage}
+                    className="absolute right-0 bg-black/50 text-white p-2 rounded-full z-10 hover:bg-black/70 transition"
+                  >
+                    <ArrowRight />
+                  </button>
+                </>
+              )}
+              <Image
+                src={uploadedImages[carouselIndex]?.url || "/placeholder.png"}
+                alt={`Uploaded Image ${carouselIndex + 1}`}
+                fill
+                className="object-cover rounded-lg"
+              />
+              {uploadedImages.length > 1 && (
+                <div className="absolute bottom-2 right-2 bg-black/70 text-white text-sm font-bold px-2 py-1 rounded-full">
+                  {carouselIndex + 1}/{uploadedImages.length}
+                </div>
               )}
             </div>
-          </div>
-          {images.length > 0 && (
-            <p className="text-sm font-semibold text-gray-700">
-              📸 {images.length} image{images.length > 1 ? "s" : ""} selected
-            </p>
-          )}
-
-          <div className="flex flex-col sm:flex-row gap-6 mt-4">
-            <Button
-              type="submit"
-              className="w-44 h-12 hover:bg-green-400 hover:text-black"
-              disabled={isSubmitting}
-            >
-              {isSubmitting ? "Reporting..." : "Submit"}
-            </Button>
 
             <Button
-              type="reset"
-              className="w-44 h-12 bg-white text-black hover:bg-red-400 hover:text-white"
-              onClick={() => window.location.reload()}
+              className="mt-4 w-full bg-gradient-to-r from-blue-400 to-green-400 hover:scale-105 transition-transform duration-300"
+              onClick={() => setShowModal(false)}
             >
-              Reset
+              Close
             </Button>
           </div>
-        </Form>
+        </div>
       )}
-    </Formik>
+    </>
   );
 };

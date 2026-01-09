@@ -35,7 +35,6 @@ export type UserProp = {
   number: string;
   email: string;
 };
-
 export type ItemProps = {
   _id: string;
   itemname: string;
@@ -48,11 +47,29 @@ export type ItemProps = {
   contactNumber: number;
   contactEmail: string;
   name: string;
+  claims: string[]; 
+  status: string;
+  createdAt: Date;
+  updatedAt: Date;
+};
+export type ItemPropsSafe = {
+  _id: string;
+  itemname: string;
+  isFound: string;
+  User: string | User; 
+  mainImage: Image;
+  images: Image[];
+  description: string;
+  location: string;
+  contactNumber: number;
+  contactEmail: string;
+  name: string;
   claims: string[];
   status: string;
   createdAt: Date;
   updatedAt: Date;
 };
+
 
 export type SearchBarProps = {
   setQuery: (value: string) => void;
@@ -112,5 +129,6 @@ export type UpdateItemPayload = Partial<{
 type GetClaimProp = {
   claimId: string,
   token: string,
+  itemId: string
 }
 

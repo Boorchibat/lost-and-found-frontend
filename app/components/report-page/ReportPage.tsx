@@ -19,11 +19,33 @@ export const ReportPage = ({ title, Data = [] }: ReportProps) => {
 
   const approvedData = Data.filter((item) => item.status === "approved");
 
-  const filterData = approvedData.filter(
-    (item) =>
+  const [filters, setFilters] = useState({
+    category: "",
+    status: "approved",
+    location: "",
+    startDate: "",
+    endDate: "",
+  });
+
+  const filterData = approvedData.filter((item) => {
+    const matchesText =
       item.itemname.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.description.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+      item.description.toLowerCase().includes(searchTerm.toLowerCase());
+
+    const matchesLocation = filters.location
+      ? item.location.toLowerCase().includes(filters.location.toLowerCase())
+      : true;
+
+    const matchesDate =
+      filters.startDate && filters.endDate
+        ? new Date(item.createdAt) >= new Date(filters.startDate) &&
+          new Date(item.createdAt) <= new Date(filters.endDate)
+        : true;
+
+    return matchesText && matchesLocation && matchesDate;
+  });
+
+  const cardsToShow = filterData.slice(0, 9);
 
   return (
     <div className="w-full flex flex-col items-center px-4 py-8 md:py-12">
@@ -43,15 +65,15 @@ export const ReportPage = ({ title, Data = [] }: ReportProps) => {
 
       <div className="w-full flex justify-center">
         <div className="w-full flex justify-center max-w-7xl p-4 rounded-lg">
-          <div className="mt-[30px] gap-x-20 flex flex-wrap justify-center items-center w-[90%] mb-[30px]">
+          <div className="mt-[30px] gap-8 flex flex-wrap justify-center items-center w-[90%] mb-[10px]">
             {loading ? (
               <div className="w-full bg-blue-100 flex justify-center items-center mt-[40px]">
                 <LoaderCircle size={60} color="#2563eb" />
               </div>
             ) : filterData.length > 0 ? (
-              filterData.map((item) => <ReportCard key={item._id} {...item} />)
+              cardsToShow.map((item) => <ReportCard key={item._id} {...item} />)
             ) : (
-              <div className="w-[] flex justify-center items-center gap-x-5 mt-[15px]">
+              <div className="flex flex-col justify-center items-center gap-4 mt-[15px]">
                 <h1 className="font-bold text-[30px]">No items found...</h1>
                 <a href="/">
                   <Button className="bg-blue-700 hover:bg-green-500">
@@ -63,12 +85,23 @@ export const ReportPage = ({ title, Data = [] }: ReportProps) => {
           </div>
         </div>
       </div>
-
-      <div className="w-full flex justify-center mt-6">
-        <a href="/lost-list">
-          <p className="text-blue-700 hover:underline">View More...</p>
-        </a>
-      </div>
+      {filterData.length > 9 && (
+        <div className="w-full flex justify-end max-w-7xl px-6 mt-4">
+          {title === "Found" ? (
+            <a href="/found-list">
+              <p className="text-blue-700 hover:underline font-semibold cursor-pointer">
+                View More...
+              </p>
+            </a>
+          ) : (
+            <a href="/lost-list">
+              <p className="text-blue-700 hover:underline font-semibold cursor-pointer">
+                View More...
+              </p>
+            </a>
+          )}
+        </div>
+      )}
     </div>
   );
 };

@@ -121,32 +121,45 @@ export const Header = () => {
                   <CircularProgress size={24} />
                 </div>
               ) : (
-                menuItems.map((item) => (
-                  <DropdownMenuItem key={item.href}>
-                    <Link href={item.href} className="w-full block">
-                      {item.label}
-                    </Link>
-                  </DropdownMenuItem>
-                ))
-              )}
+                <>
+                  {isAdmin && user && (
+                    <DropdownMenuItem>
+                      <Link
+                        href={`/admin/${user._id}`}
+                        className="w-full block"
+                      >
+                        Admin
+                      </Link>
+                    </DropdownMenuItem>
+                  )}
 
-              <DropdownMenuItem>
-                {user ? (
-                  <Button
-                    onClick={logout}
-                    className="bg-gray-500 w-full flex justify-center"
-                  >
-                    Sign Out
-                  </Button>
-                ) : (
-                  <Button
-                    onClick={handleSignIn}
-                    className="bg-green-500 w-full flex justify-center"
-                  >
-                    Sign In
-                  </Button>
-                )}
-              </DropdownMenuItem>
+                  {menuItems.map((item) => (
+                    <DropdownMenuItem key={item.href}>
+                      <Link href={item.href} className="w-full block">
+                        {item.label}
+                      </Link>
+                    </DropdownMenuItem>
+                  ))}
+
+                  <DropdownMenuItem>
+                    {user ? (
+                      <Button
+                        onClick={logout}
+                        className="bg-gray-500 w-full flex justify-center"
+                      >
+                        Sign Out
+                      </Button>
+                    ) : (
+                      <Button
+                        onClick={handleSignIn}
+                        className="bg-green-500 w-full flex justify-center"
+                      >
+                        Sign In
+                      </Button>
+                    )}
+                  </DropdownMenuItem>
+                </>
+              )}
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
