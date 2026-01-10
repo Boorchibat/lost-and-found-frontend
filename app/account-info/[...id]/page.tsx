@@ -10,60 +10,67 @@ import { EditProfile } from "@/app/components/profile/EditProfile";
 import { ReportCard } from "@/app/components/report-page/components/card/ReportCard";
 import { Button } from "@/components/ui/button";
 
-const page = () => {
+const Page = () => {
   const { token, user } = useUser();
-  const [Data, setData] = useState<ItemProps[]>([]);
+
+  const [data, setData] = useState<ItemProps[]>([]);
   const [userData, setUserData] = useState<any>(null);
   const [itemsLoading, setItemsLoading] = useState(true);
   const [userLoading, setUserLoading] = useState(true);
 
   useEffect(() => {
     if (!user?._id) return;
-    setItemsLoading(false);
 
-    getItemz<ItemProps[]>(user._id).then(setData).catch(console.error);
+    setItemsLoading(true);
+    getItemz<ItemProps[]>(user._id)
+      .then(setData)
+      .catch(console.error)
+      .finally(() => setItemsLoading(false));
   }, [user?._id]);
+
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 6;
-  const totalPages = Math.ceil(Data.length / itemsPerPage);
+
+  const totalPages = Math.ceil(data.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
-  const endIndex = startIndex + itemsPerPage;
-  const currentItems = Data.slice(startIndex, endIndex);
+  const currentItems = data.slice(startIndex, startIndex + itemsPerPage);
 
   useEffect(() => {
-    if (!user?._id) return;
+    if (!user?._id || !token) return;
 
-    setUserLoading(false);
     const fetchUser = async () => {
       try {
-        const data = await getSingleUser(user._id);
-        setUserData(data);
+        setUserLoading(true);
+        const result = await getSingleUser(user._id);
+        setUserData(result);
       } catch (error) {
-        console.error("Error retrieving user data", error);
+        console.error(error);
+      } finally {
+        setUserLoading(false);
       }
     };
 
     fetchUser();
-  }, [token, user?._id]);
+  }, [user?._id, token]);
+
   return (
-    <div className="w-full bg-gradient-to-r from-yellow-500 to-blue-500 flex flex-col h-auto justify-center items-center">
+    <div className="w-full bg-gradient-to-r from-yellow-500 to-blue-500 flex flex-col items-center">
       <h1 className="font-bold text-[40px] mt-[30px]">Profile</h1>
-      {itemsLoading ? (
-        <CircularProgress />
-      ) : (
-        <EditProfile userData={userData} />
-      )}
-      <div className="mt-10 flex w-full justify-center items-center w-[70%]">
-        <h1 className="font-bold text-[30px]">User's listed items:</h1>
+
+      {userLoading ? <CircularProgress /> : <EditProfile userData={userData} />}
+
+      <div className="mt-10 w-[70%] text-center">
+        <h1 className="font-bold text-[30px]">User&apos;s listed items:</h1>
       </div>
-      <div className="w-[70%] flex rounded-md h-auto mt-[50px] mb-[50px] justify-center items-center flex-wrap">
+
+      <div className="w-[70%] mt-[50px] mb-[50px]">
         {itemsLoading ? (
-          <div className="flex justify-center items-center">
+          <div className="flex justify-center">
             <CircularProgress />
           </div>
         ) : currentItems.length > 0 ? (
           <>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 flex justify-center items-center gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
               {currentItems.map((item) => (
                 <ReportCard key={item._id} {...item} />
               ))}
@@ -72,22 +79,22 @@ const page = () => {
             {totalPages > 1 && (
               <div className="flex justify-center items-center gap-4 mt-6">
                 <Button
-                  className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400 disabled:opacity-50"
-                  onClick={() => setCurrentPage((prev) => prev - 1)}
+                  onClick={() => setCurrentPage((p) => p - 1)}
                   disabled={currentPage === 1}
                 >
                   Previous
                 </Button>
+
                 <span className="font-semibold">
                   Page {currentPage} of {totalPages}
                 </span>
-                <button
-                  className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400 disabled:opacity-50"
-                  onClick={() => setCurrentPage((prev) => prev + 1)}
+
+                <Button
+                  onClick={() => setCurrentPage((p) => p + 1)}
                   disabled={currentPage === totalPages}
                 >
                   Next
-                </button>
+                </Button>
               </div>
             )}
           </>
@@ -100,4 +107,5 @@ const page = () => {
     </div>
   );
 };
-export default page;
+
+export default Page;
