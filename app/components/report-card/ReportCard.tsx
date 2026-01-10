@@ -260,8 +260,8 @@ export const ReportCard = ({
             <h2 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-green-500 to-blue-500 animate-textGlow">
               Submitted Successfully!
             </h2>
-            <p className="text-gray-700 text-center">
-              Your item has been reported. It is under admin review once apporved it will be availble.
+            <p className="text-gray-700 text-center font-bold">
+              Your item has been reported. It is under admin review, when it is approved it will be availble.
             </p>
 
             <div className="relative w-60 h-60 flex items-center justify-center mt-2">
