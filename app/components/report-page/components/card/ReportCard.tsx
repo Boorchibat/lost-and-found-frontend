@@ -1,37 +1,49 @@
 "use client";
 
-import { useUser } from "@/app/context/UserContext";
 import { Button } from "@/components/ui/button";
-import { ItemProps } from "@/index";
+import { ItemPropsSafe } from "@/index"; // User can be string | null
 import { getSingleUser } from "@/lib/auth/getUser";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { CircularProgress } from "@mui/material";
 
-export const ReportCard = (props: ItemProps) => {
-  const { token, user } = useUser();
+export const ReportCard = (props: ItemPropsSafe) => {
   const [userData, setUserData] = useState<any>(null);
   const [userLoading, setUserLoading] = useState(true);
   const router = useRouter();
 
   useEffect(() => {
-    if (!user?._id || !token) return;
+    if (!props.User) {
+      setUserLoading(false);
+      return;
+    }
+
+    let userId: string | undefined;
+    if (typeof props.User === "string") {
+      userId = props.User;
+    } else if (props.User._id) {
+      setUserData(props.User);
+      setUserLoading(false);
+      return;
+    }
+
+    if (!userId) return;
 
     const fetchUser = async () => {
       try {
         setUserLoading(true);
-        const result = await getSingleUser(user._id);
+        const result = await getSingleUser(userId);
         setUserData(result);
       } catch (error) {
-        console.error(error);
+        console.error("Failed to fetch user:", error);
       } finally {
         setUserLoading(false);
       }
     };
 
     fetchUser();
-  }, [user?._id, token]);
+  }, [props.User]);
 
   const handleUserClick = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -43,6 +55,8 @@ export const ReportCard = (props: ItemProps) => {
   const handleCardClick = () => {
     router.push(`/item/${props._id}`);
   };
+
+  // Loader while fetching user
   if (userLoading) {
     return (
       <div className="flex items-center justify-center w-[300px] h-[380px] mt-6 bg-white rounded-2xl border border-gray-200 shadow-lg">
@@ -56,23 +70,40 @@ export const ReportCard = (props: ItemProps) => {
       onClick={handleCardClick}
       className="cursor-pointer transform hover:scale-105 transition-transform duration-300 w-[300px] h-[380px] mt-6 bg-white rounded-2xl border border-gray-200 shadow-lg flex flex-col overflow-hidden"
     >
+      {/* Header */}
       <div className="h-[18%] w-full bg-gray-50 flex items-center px-4 py-3 border-b border-gray-100">
-        <div onClick={handleUserClick} className="cursor-pointer">
+        {userData ? (
+          <div onClick={handleUserClick} className="cursor-pointer">
+            <Image
+              src={userData.profileImage?.url || "/user.svg"}
+              alt={userData.username || "User"}
+              width={40}
+              height={40}
+              className="rounded-full bg-gray-200"
+            />
+          </div>
+        ) : (
           <Image
-            src={userData?.profileImage?.url || "/user.svg"}
-            alt={props.User?.username || "User"}
+            src="/user.svg"
+            alt="Anonymous"
             width={40}
             height={40}
             className="rounded-full bg-gray-200"
           />
-        </div>
+        )}
         <div className="ml-3 flex flex-col">
-          <h1 className="font-semibold text-gray-800">{props.itemname || "Unnamed Item"}</h1>
+          <h1 className="font-semibold text-gray-800">
+            {props.itemname || "Unnamed Item"}
+          </h1>
           <span className="text-sm text-gray-500">
-            {props.createdAt ? new Date(props.createdAt).toDateString() : "Unknown date"}
+            {props.createdAt
+              ? new Date(props.createdAt).toDateString()
+              : "Unknown date"}
           </span>
         </div>
       </div>
+
+      {/* Main Image */}
       <div className="h-[35%] w-full p-4 flex justify-center items-center">
         {props.mainImage?.url ? (
           <Image
@@ -88,10 +119,14 @@ export const ReportCard = (props: ItemProps) => {
           </div>
         )}
       </div>
+
+      {/* Details */}
       <div className="h-[47%] w-full px-4 pb-4 flex flex-col justify-between">
         <div>
           <h1 className="font-semibold text-gray-700">Location:</h1>
-          <p className="text-sm text-gray-500">{props.location || "Unknown location"}</p>
+          <p className="text-sm text-gray-500">
+            {props.location || "Unknown location"}
+          </p>
         </div>
         <div className="flex-1 mt-2">
           <h1 className="font-semibold text-gray-700">Description:</h1>
