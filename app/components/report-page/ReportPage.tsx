@@ -46,6 +46,7 @@ export const ReportPage = ({ title, Data = [] }: ReportProps) => {
   });
 
   const cardsToShow = filterData.slice(0, 9);
+  const lost = title === "Lost items";
 
   return (
     <div className="w-full flex flex-col items-center px-4 py-8 md:py-12">
@@ -58,7 +59,13 @@ export const ReportPage = ({ title, Data = [] }: ReportProps) => {
             <Searchbar setQuery={setSearchTerm} />
           </div>
           <div className="flex justify-center items-center">
-            <Button className="h-12 w-full sm:w-36">Report</Button>
+            {lost ? (
+              <a href="/report-lost">
+                <Button className="h-12 w-full sm:w-36">Report</Button>
+              </a>
+            ) : (
+              <a href="/report-found"> <Button className="h-12 w-full sm:w-36">Report</Button></a>
+            )}
           </div>
         </div>
       </div>

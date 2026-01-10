@@ -7,6 +7,7 @@ import { getSingleUser } from "@/lib/auth/getUser";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { CircularProgress } from "@mui/material";
 
 export const ReportCard = (props: ItemProps) => {
   const { token, user } = useUser();
@@ -31,8 +32,9 @@ export const ReportCard = (props: ItemProps) => {
 
     fetchUser();
   }, [user?._id, token]);
+
   const handleUserClick = (e: React.MouseEvent) => {
-    e.stopPropagation(); 
+    e.stopPropagation();
     if (userData?._id) {
       router.push(`/account-info/${userData._id}`);
     }
@@ -41,6 +43,13 @@ export const ReportCard = (props: ItemProps) => {
   const handleCardClick = () => {
     router.push(`/item/${props._id}`);
   };
+  if (userLoading) {
+    return (
+      <div className="flex items-center justify-center w-[300px] h-[380px] mt-6 bg-white rounded-2xl border border-gray-200 shadow-lg">
+        <CircularProgress />
+      </div>
+    );
+  }
 
   return (
     <div
@@ -64,7 +73,6 @@ export const ReportCard = (props: ItemProps) => {
           </span>
         </div>
       </div>
-
       <div className="h-[35%] w-full p-4 flex justify-center items-center">
         {props.mainImage?.url ? (
           <Image
