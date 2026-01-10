@@ -1,4 +1,4 @@
-import { User, UserProp } from "@/index";
+import { UserProp } from "@/index";
 import { update } from "../getDataFromBackend";
 
 export const UpdateUser = (
@@ -7,5 +7,4 @@ export const UpdateUser = (
   token: string
 ): Promise<UserProp> => {
   return update<UserProp, UserProp>(`/auth/${userId}`, payload, token);
-  console.log(`/auth/${userId}`, payload, token);
 };
