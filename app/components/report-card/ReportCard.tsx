@@ -26,9 +26,10 @@ const ReportSchema = Yup.object().shape({
 });
 
 export const ReportCard = ({
-  isFound,
+  isFound, title
 }: {
   isFound: "Found" | "In progress";
+  title: string
 }) => {
   const { user, token } = useUser();
   const [images, setImages] = useState<File[]>([]);
@@ -144,7 +145,7 @@ export const ReportCard = ({
         {({ isSubmitting, handleChange, values, errors, touched }) => (
           <Form className="w-[80%] lg:w-[60%] flex flex-col items-center gap-6 bg-gradient-to-r from-yellow-200 via-yellow-100 to-yellow-200 rounded-3xl p-8 mt-6 shadow-xl border border-yellow-300 animate-fadeIn">
             <h1 className="text-4xl sm:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-green-500 animate-textGlow mb-6 text-center">
-              Report an Item
+              {title}
             </h1>
 
             {[
@@ -260,7 +261,7 @@ export const ReportCard = ({
               Submitted Successfully!
             </h2>
             <p className="text-gray-700 text-center">
-              Your item has been reported. You can view it in your profile.
+              Your item has been reported. It is under admin review once apporved it will be availble.
             </p>
 
             <div className="relative w-60 h-60 flex items-center justify-center mt-2">
