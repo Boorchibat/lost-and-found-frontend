@@ -1,16 +1,18 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { ItemPropsSafe } from "@/index"; // User can be string | null
+import { ItemProps } from "@/index"; 
 import { getSingleUser } from "@/lib/auth/getUser";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { CircularProgress } from "@mui/material";
+import { ContactModal } from "../ContactModal";
 
-export const ReportCard = (props: ItemPropsSafe) => {
+export const ReportCard = (props: ItemProps) => {
   const [userData, setUserData] = useState<any>(null);
   const [userLoading, setUserLoading] = useState(true);
+  const [openContact, setOpenContact] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -45,6 +47,11 @@ export const ReportCard = (props: ItemPropsSafe) => {
     fetchUser();
   }, [props.User]);
 
+  const handleCardClick = () => {
+    if (openContact) return;
+    router.push(`/item/${props._id}`);
+  };
+
   const handleUserClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (userData?._id) {
@@ -52,11 +59,11 @@ export const ReportCard = (props: ItemPropsSafe) => {
     }
   };
 
-  const handleCardClick = () => {
-    router.push(`/item/${props._id}`);
+  const handleContactClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setOpenContact(true);
   };
 
-  // Loader while fetching user
   if (userLoading) {
     return (
       <div className="flex items-center justify-center w-[300px] h-[380px] mt-6 bg-white rounded-2xl border border-gray-200 shadow-lg">
@@ -70,27 +77,16 @@ export const ReportCard = (props: ItemPropsSafe) => {
       onClick={handleCardClick}
       className="cursor-pointer transform hover:scale-105 transition-transform duration-300 w-[300px] h-[380px] mt-6 bg-white rounded-2xl border border-gray-200 shadow-lg flex flex-col overflow-hidden"
     >
-      {/* Header */}
       <div className="h-[18%] w-full bg-gray-50 flex items-center px-4 py-3 border-b border-gray-100">
-        {userData ? (
-          <div onClick={handleUserClick} className="cursor-pointer">
-            <Image
-              src={userData.profileImage?.url || "/user.svg"}
-              alt={userData.username || "User"}
-              width={40}
-              height={40}
-              className="rounded-full bg-gray-200"
-            />
-          </div>
-        ) : (
+        <div onClick={handleUserClick} className="cursor-pointer">
           <Image
-            src="/user.svg"
-            alt="Anonymous"
+            src={userData?.profileImage?.url || "/user.svg"}
+            alt={userData?.username || "User"}
             width={40}
             height={40}
             className="rounded-full bg-gray-200"
           />
-        )}
+        </div>
         <div className="ml-3 flex flex-col">
           <h1 className="font-semibold text-gray-800">
             {props.itemname || "Unnamed Item"}
@@ -103,7 +99,6 @@ export const ReportCard = (props: ItemPropsSafe) => {
         </div>
       </div>
 
-      {/* Main Image */}
       <div className="h-[35%] w-full p-4 flex justify-center items-center">
         {props.mainImage?.url ? (
           <Image
@@ -120,7 +115,6 @@ export const ReportCard = (props: ItemPropsSafe) => {
         )}
       </div>
 
-      {/* Details */}
       <div className="h-[47%] w-full px-4 pb-4 flex flex-col justify-between">
         <div>
           <h1 className="font-semibold text-gray-700">Location:</h1>
@@ -135,10 +129,18 @@ export const ReportCard = (props: ItemPropsSafe) => {
           </p>
         </div>
         <div className="flex justify-end mt-3">
-          <Button className="rounded-lg bg-gradient-to-r from-blue-400 to-green-400 text-white hover:scale-105 transition-transform duration-300">
+          <Button
+            onClick={handleContactClick}
+            className="rounded-lg bg-gradient-to-r from-blue-400 to-green-400 text-white hover:scale-105 transition-transform duration-300"
+          >
             Contact
           </Button>
         </div>
+        <ContactModal
+          data={props}
+          handleClose={() => setOpenContact(false)}
+          open={openContact}
+        />
       </div>
     </div>
   );
