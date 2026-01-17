@@ -8,11 +8,11 @@ const Signup = () => {
         <SignupCard />
       </div>
       <Image
-        src={"../file.svg"}
+        src="/image2.png"
         alt="image"
         height={600}
-        width={600}
-        className="bg-blue-100"
+        width={850}
+        className=" ml-[30px] mb-[50px] mt-[50px] rounded-md flex justify-center items-center"
       />
     </div>
   );

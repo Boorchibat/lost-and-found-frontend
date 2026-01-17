@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { ItemProps } from "@/index"; 
+import { ItemProps } from "@/index";
 import { getSingleUser } from "@/lib/auth/getUser";
 import Image from "next/image";
 import { useEffect, useState } from "react";
@@ -82,13 +82,13 @@ export const ReportCard = (props: ItemProps) => {
           <Image
             src={userData?.profileImage?.url || "/user.svg"}
             alt={userData?.username || "User"}
-            width={40}
-            height={40}
+            width={50}
+            height={70}
             className="rounded-full bg-gray-200"
           />
         </div>
         <div className="ml-3 flex flex-col">
-          <h1 className="font-semibold text-gray-800">
+          <h1 className="font-semibold text-gray-800 truncate">
             {props.itemname || "Unnamed Item"}
           </h1>
           <span className="text-sm text-gray-500">
@@ -99,14 +99,14 @@ export const ReportCard = (props: ItemProps) => {
         </div>
       </div>
 
-      <div className="h-[35%] w-full p-4 flex justify-center items-center">
+      <div className="h-[35%] w-full p-2 flex justify-center items-center">
         {props.mainImage?.url ? (
           <Image
             src={props.mainImage.url}
             alt={props.itemname || "Item image"}
-            width={180}
-            height={120}
-            className="object-cover rounded-lg shadow-sm"
+            width={200}
+            height={200}
+            className="object-cover w-full h-full rounded-lg shadow-sm"
           />
         ) : (
           <div className="w-[180px] h-[120px] bg-gray-200 flex items-center justify-center rounded-lg">
@@ -116,18 +116,22 @@ export const ReportCard = (props: ItemProps) => {
       </div>
 
       <div className="h-[47%] w-full px-4 pb-4 flex flex-col justify-between">
-        <div>
-          <h1 className="font-semibold text-gray-700">Location:</h1>
-          <p className="text-sm text-gray-500">
-            {props.location || "Unknown location"}
-          </p>
-        </div>
         <div className="flex-1 mt-2">
           <h1 className="font-semibold text-gray-700">Description:</h1>
-          <p className="text-sm text-gray-600 line-clamp-3">
+          <p
+            className="text-sm text-gray-600 line-clamp-3 truncate
+          "
+          >
             {props.description || "No description available."}
           </p>
         </div>
+        <div>
+          <h1 className="font-semibold text-gray-700">Location:</h1>
+          <p className="text-sm text-gray-500 truncate">
+            {props.location || "Unknown location"}
+          </p>
+        </div>
+
         <div className="flex justify-end mt-3">
           <Button
             onClick={handleContactClick}

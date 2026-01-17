@@ -11,11 +11,34 @@ import { uploadToCloudinary } from "@/lib/cloudinary/UploadToCloudinary";
 import { useUser } from "@/app/context/UserContext";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 
+const colors = [
+  "Red",
+  "Blue",
+  "Green",
+  "Yellow",
+  "Black",
+  "White",
+  "Purple",
+  "Orange",
+  "Brown",
+  "Gray",
+  "other"
+];
+const physicalTypes = [
+  "Backpack",
+  "Clothes",
+  "Shoes",
+  "Hat",
+  "Airpods",
+  "Laptop Charger",
+  "Notebook",
+  "other"
+];
+
 const ReportSchema = Yup.object().shape({
   name: Yup.string().required("Name is required"),
   itemname: Yup.string().required("Item name is required"),
   location: Yup.string().required("Location is required"),
-  date: Yup.string().required("Date is required"),
   description: Yup.string().required("Description is required"),
   contactNumber: Yup.string()
     .matches(/^\d{10}$/, "Phone number must be 10 digits")
@@ -26,10 +49,11 @@ const ReportSchema = Yup.object().shape({
 });
 
 export const ReportCard = ({
-  isFound, title
+  title,
+  isFound,
 }: {
+  title: string;
   isFound: "Found" | "In progress";
-  title: string
 }) => {
   const { user, token } = useUser();
   const [images, setImages] = useState<File[]>([]);
@@ -38,19 +62,18 @@ export const ReportCard = ({
   const [showModal, setShowModal] = useState(false);
   const [carouselIndex, setCarouselIndex] = useState(0);
 
-  if (!user || !token) {
+  if (!user || !token)
     return (
       <div className="h-screen flex items-center justify-center">
         No user found
       </div>
     );
-  }
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
-    if (files.length === 0) return;
+    if (!files.length) return;
 
-    const invalid = files.find((file) => !file.type.startsWith("image/"));
+    const invalid = files.find((f) => !f.type.startsWith("image/"));
     if (invalid) {
       setUploadMessage("❌ All files must be images");
       return;
@@ -84,14 +107,15 @@ export const ReportCard = ({
           name: "",
           itemname: "",
           location: "",
-          date: "",
           description: "",
           contactNumber: "",
           contactEmail: "",
+          color: [] as string[],
+          physical: [] as string[],
         }}
         validationSchema={ReportSchema}
         onSubmit={async (values, { setSubmitting, resetForm }) => {
-          if (images.length === 0) {
+          if (!images.length) {
             alert("Please upload at least one image");
             return;
           }
@@ -107,7 +131,6 @@ export const ReportCard = ({
               name: values.name,
               itemname: values.itemname,
               location: values.location,
-              date: values.date,
               description: values.description,
               contactNumber: Number(values.contactNumber),
               contactEmail: values.contactEmail,
@@ -121,10 +144,11 @@ export const ReportCard = ({
                 url: img.secure_url,
                 public_id: img.public_id,
               })),
+              color: values.color,
+              physical: values.physical,
             };
 
             await PostItem(payload, token);
-
             setShowModal(true);
             setCarouselIndex(0);
             resetForm();
@@ -142,20 +166,26 @@ export const ReportCard = ({
           }
         }}
       >
-        {({ isSubmitting, handleChange, values, errors, touched }) => (
-          <Form className="w-[80%] lg:w-[60%] flex flex-col items-center gap-6 bg-gradient-to-r from-yellow-200 via-yellow-100 to-yellow-200 rounded-3xl p-8 mt-6 shadow-xl border border-yellow-300 animate-fadeIn">
+        {({
+          isSubmitting,
+          handleChange,
+          values,
+          errors,
+          touched,
+          setFieldValue,
+        }) => (
+          <Form className="w-[95%] lg:w-[60%] flex flex-col items-center gap-6 bg-gradient-to-r from-yellow-200 via-yellow-100 to-yellow-200 rounded-3xl p-8 mt-6 shadow-xl border border-yellow-300 animate-fadeIn">
             <h1 className="text-4xl sm:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-green-500 animate-textGlow mb-6 text-center">
               {title}
             </h1>
 
             {[
-              { label: "Name", name: "name", type: "text" },
-              { label: "Item", name: "itemname", type: "text" },
-              { label: "Location", name: "location", type: "text" },
-              { label: "Date", name: "date", type: "date" },
-              { label: "Description", name: "description", type: "text" },
-              { label: "Phone", name: "contactNumber", type: "text" },
-              { label: "Email", name: "contactEmail", type: "text" },
+              { label: "Name", name: "name" },
+              { label: "Item", name: "itemname" },
+              { label: "Location", name: "location" },
+              { label: "Description", name: "description" },
+              { label: "Phone", name: "contactNumber" },
+              { label: "Email", name: "contactEmail" },
             ].map((field) => (
               <div
                 key={field.name}
@@ -163,7 +193,7 @@ export const ReportCard = ({
               >
                 <h1 className="font-semibold text-lg w-32">{field.label}:</h1>
                 <Input
-                  type={field.type}
+                  type="text"
                   name={field.name}
                   value={(values as any)[field.name]}
                   onChange={handleChange}
@@ -177,6 +207,57 @@ export const ReportCard = ({
                   )}
               </div>
             ))}
+
+            <div className="w-full flex flex-col sm:flex-row items-start gap-4">
+              <h1 className="font-semibold text-lg w-32">Color:</h1>
+              <div className="flex flex-wrap w-full sm:w-2/3 gap-2">
+                {colors.map((color) => (
+                  <Button
+                    type="button"
+                    key={color}
+                    variant={
+                      values.color.includes(color) ? "default" : "outline"
+                    }
+                    onClick={() => {
+                      if (values.color.includes(color))
+                        setFieldValue(
+                          "color",
+                          values.color.filter((c) => c !== color)
+                        );
+                      else setFieldValue("color", [...values.color, color]);
+                    }}
+                  >
+                    {color}
+                  </Button>
+                ))}
+              </div>
+            </div>
+
+            <div className="w-full flex flex-col sm:flex-row items-start gap-4">
+              <h1 className="font-semibold text-lg w-32">Physical Type:</h1>
+              <div className="flex flex-wrap w-full sm:w-2/3 gap-2">
+                {physicalTypes.map((type) => (
+                  <Button
+                    type="button"
+                    key={type}
+                    variant={
+                      values.physical.includes(type) ? "default" : "outline"
+                    }
+                    onClick={() => {
+                      if (values.physical.includes(type))
+                        setFieldValue(
+                          "physical",
+                          values.physical.filter((p) => p !== type)
+                        );
+                      else
+                        setFieldValue("physical", [...values.physical, type]);
+                    }}
+                  >
+                    {type}
+                  </Button>
+                ))}
+              </div>
+            </div>
 
             <div className="w-full flex flex-col sm:flex-row items-start gap-4">
               <h1 className="font-semibold text-lg w-32">Upload Photos:</h1>
@@ -212,7 +293,6 @@ export const ReportCard = ({
                     {uploadMessage}
                   </p>
                 )}
-
                 {images.length > 0 && (
                   <div className="flex flex-wrap gap-3 mt-4">
                     {images.map((file, index) => (
@@ -230,10 +310,9 @@ export const ReportCard = ({
                     ))}
                   </div>
                 )}
-
-          
               </div>
             </div>
+
             <div className="flex flex-col sm:flex-row gap-6 mt-4">
               <Button
                 type="submit"
@@ -261,7 +340,8 @@ export const ReportCard = ({
               Submitted Successfully!
             </h2>
             <p className="text-gray-700 text-center font-bold">
-              Your item has been reported. It is under admin review, when it is approved it will be availble.
+              Your item has been reported. It is under admin review, when it is
+              approved it will be available.
             </p>
 
             <div className="relative w-60 h-60 flex items-center justify-center mt-2">

@@ -11,9 +11,10 @@ export interface ItemPayload {
   contactNumber: number;
   contactEmail: string;
   name: string;
+  color: string[];
+  physical: string[];
 }
 
 export const PostItem = (payload: ItemPayload, token: string) => {
   return postItems("/item", payload, token);
 };
-

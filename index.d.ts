@@ -38,7 +38,7 @@ export type UserProp = {
 export type ItemProps = {
   _id: string;
   itemname: string;
-  isFound: string;
+  isFound: "Found" | "In progress";
   User: User;
   mainImage: Image;
   images: Image[];
@@ -47,7 +47,9 @@ export type ItemProps = {
   contactNumber: number;
   contactEmail: string;
   name: string;
-  claims: string[]; 
+  color: string[];
+  physical: string[];
+  claims: string[];
   status: string;
   createdAt: Date;
   updatedAt: Date;

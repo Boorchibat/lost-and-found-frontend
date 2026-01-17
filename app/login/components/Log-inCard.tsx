@@ -50,7 +50,7 @@ export const LoginCard = () => {
       }}
     >
       {({ values, errors, touched, handleChange, isSubmitting }) => (
-        <Form className="w-[50%] h-[90%] flex flex-col p-5 items-center bg-yellow-100 rounded-md">
+        <Form className="lg:w-[60%] w-[95%]  h-[90%] flex flex-col p-5 items-center bg-yellow-100 rounded-md">
           <h1 className="font-bold text-[30px]">Log In</h1>
 
           <div className="w-full mt-5 p-5">
