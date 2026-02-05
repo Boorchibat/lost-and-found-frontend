@@ -4,6 +4,7 @@ import "./globals.css";
 import { Header } from "./components/header/Header";
 import { Footer } from "./components/footer/Footer";
 import { UserProvider } from "./context/UserContext";
+import PageTransition from "./components/PageTransition";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -27,10 +28,14 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+      <body
+        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+      >
         <UserProvider>
           <Header />
-          <div className="h-auto">{children}</div>
+          <div className="h-auto">
+            <PageTransition>{children}</PageTransition>
+          </div>
           <Footer />
         </UserProvider>
       </body>

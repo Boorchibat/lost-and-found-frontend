@@ -9,30 +9,13 @@ import * as Yup from "yup";
 import { PostItem } from "@/lib/item/postItem";
 import { uploadToCloudinary } from "@/lib/cloudinary/UploadToCloudinary";
 import { useUser } from "@/app/context/UserContext";
-import { ArrowLeft, ArrowRight } from "lucide-react";
+import { ArrowLeft, ArrowRight, XCircle } from "lucide-react";
 
 const colors = [
-  "Red",
-  "Blue",
-  "Green",
-  "Yellow",
-  "Black",
-  "White",
-  "Purple",
-  "Orange",
-  "Brown",
-  "Gray",
-  "other"
+  "Red", "Blue", "Green", "Yellow", "Black", "White", "Purple", "Orange", "Brown", "Gray", "other"
 ];
 const physicalTypes = [
-  "Backpack",
-  "Clothes",
-  "Shoes",
-  "Hat",
-  "Airpods",
-  "Laptop Charger",
-  "Notebook",
-  "other"
+  "Backpack", "Clothes", "Shoes", "Hat", "Airpods", "Laptop Charger", "Notebook", "other"
 ];
 
 const ReportSchema = Yup.object().shape({
@@ -61,6 +44,7 @@ export const ReportCard = ({
   const [uploadMessage, setUploadMessage] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [carouselIndex, setCarouselIndex] = useState(0);
+  const [uploading, setUploading] = useState(false);
 
   if (!user || !token)
     return (
@@ -93,6 +77,11 @@ export const ReportCard = ({
     e.target.value = "";
   };
 
+  const removeImage = (index: number) => {
+    setImages((prev) => prev.filter((_, i) => i !== index));
+    if (images.length <= 1) setUploadMessage("");
+  };
+
   const nextImage = () =>
     setCarouselIndex((prev) => (prev + 1) % uploadedImages.length);
   const prevImage = () =>
@@ -121,7 +110,7 @@ export const ReportCard = ({
           }
 
           try {
-            setSubmitting(true);
+            setUploading(true);
             const uploaded = await Promise.all(
               images.map((img) => uploadToCloudinary(img))
             );
@@ -156,12 +145,9 @@ export const ReportCard = ({
             setUploadMessage("");
           } catch (error: any) {
             console.error(error);
-            alert(
-              error?.response?.data?.error ||
-                error?.message ||
-                "Failed to report item"
-            );
+            alert("Failed to report item");
           } finally {
+            setUploading(false);
             setSubmitting(false);
           }
         }}
@@ -175,7 +161,7 @@ export const ReportCard = ({
           setFieldValue,
         }) => (
           <Form className="w-[95%] lg:w-[60%] flex flex-col items-center gap-6 bg-gradient-to-r from-yellow-200 via-yellow-100 to-yellow-200 rounded-3xl p-8 mt-6 shadow-xl border border-yellow-300 animate-fadeIn">
-            <h1 className="text-4xl sm:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-green-500 animate-textGlow mb-6 text-center">
+            <h1 className="text-4xl sm:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-green-500 mb-6 text-center">
               {title}
             </h1>
 
@@ -187,10 +173,7 @@ export const ReportCard = ({
               { label: "Phone", name: "contactNumber" },
               { label: "Email", name: "contactEmail" },
             ].map((field) => (
-              <div
-                key={field.name}
-                className="w-full flex flex-col sm:flex-row items-center gap-4"
-              >
+              <div key={field.name} className="w-full flex flex-col sm:flex-row items-center gap-4">
                 <h1 className="font-semibold text-lg w-32">{field.label}:</h1>
                 <Input
                   type="text"
@@ -199,12 +182,9 @@ export const ReportCard = ({
                   onChange={handleChange}
                   className="w-full sm:w-2/3 border-2 border-gray-300 focus:border-blue-400 focus:ring focus:ring-blue-200 rounded-md shadow-sm transition-all duration-300"
                 />
-                {touched[field.name as keyof typeof touched] &&
-                  errors[field.name as keyof typeof errors] && (
-                    <p className="text-red-600 text-sm ml-1 mt-1">
-                      <ErrorMessage name={field.name} />
-                    </p>
-                  )}
+                {touched[field.name as keyof typeof touched] && errors[field.name as keyof typeof errors] && (
+                    <p className="text-red-600 text-sm ml-1 mt-1"><ErrorMessage name={field.name} /></p>
+                )}
               </div>
             ))}
 
@@ -215,15 +195,10 @@ export const ReportCard = ({
                   <Button
                     type="button"
                     key={color}
-                    variant={
-                      values.color.includes(color) ? "default" : "outline"
-                    }
+                    variant={values.color.includes(color) ? "default" : "outline"}
                     onClick={() => {
                       if (values.color.includes(color))
-                        setFieldValue(
-                          "color",
-                          values.color.filter((c) => c !== color)
-                        );
+                        setFieldValue("color", values.color.filter((c) => c !== color));
                       else setFieldValue("color", [...values.color, color]);
                     }}
                   >
@@ -240,17 +215,11 @@ export const ReportCard = ({
                   <Button
                     type="button"
                     key={type}
-                    variant={
-                      values.physical.includes(type) ? "default" : "outline"
-                    }
+                    variant={values.physical.includes(type) ? "default" : "outline"}
                     onClick={() => {
                       if (values.physical.includes(type))
-                        setFieldValue(
-                          "physical",
-                          values.physical.filter((p) => p !== type)
-                        );
-                      else
-                        setFieldValue("physical", [...values.physical, type]);
+                        setFieldValue("physical", values.physical.filter((p) => p !== type));
+                      else setFieldValue("physical", [...values.physical, type]);
                     }}
                   >
                     {type}
@@ -274,38 +243,39 @@ export const ReportCard = ({
                   htmlFor="upload"
                   className="flex items-center justify-center gap-2 border border-gray-400 rounded-lg p-2 cursor-pointer bg-white hover:bg-gradient-to-r hover:from-green-400 hover:to-blue-400 transition-all duration-300 shadow-md"
                 >
-                  <Image
-                    src="/upload.svg"
-                    alt="Upload"
-                    width={30}
-                    height={30}
-                  />
+                  <Image src="/upload.svg" alt="Upload" width={30} height={30} />
                   Upload Images
                 </label>
+                
                 {uploadMessage && (
-                  <p
-                    className={`mt-2 font-semibold ${
-                      uploadMessage.includes("❌")
-                        ? "text-red-600"
-                        : "text-green-600"
-                    }`}
-                  >
+                  <p className={`mt-2 font-semibold ${uploadMessage.includes("❌") ? "text-red-600" : "text-green-600"}`}>
                     {uploadMessage}
                   </p>
                 )}
+
+                {uploading && (
+                  <div className="w-full bg-gray-200 rounded-full h-1.5 mt-2 overflow-hidden">
+                    <div className="bg-blue-500 h-full animate-progress-loading w-full origin-left"></div>
+                  </div>
+                )}
+
                 {images.length > 0 && (
                   <div className="flex flex-wrap gap-3 mt-4">
                     {images.map((file, index) => (
-                      <div
-                        key={file.name + index}
-                        className="w-24 h-24 relative rounded-lg overflow-hidden shadow-md border"
-                      >
+                      <div key={index} className="w-24 h-24 relative rounded-lg overflow-hidden shadow-md border group">
                         <Image
                           src={URL.createObjectURL(file)}
-                          alt={`Selected Image ${index + 1}`}
+                          alt={`preview-${index}`}
                           fill
                           className="object-cover"
                         />
+                        <button
+                          type="button"
+                          onClick={() => removeImage(index)}
+                          className="absolute top-1 right-1 p-0.5 bg-white/90 rounded-full text-red-600 hover:text-red-800 transition z-10"
+                        >
+                          <XCircle size={18} />
+                        </button>
                       </div>
                     ))}
                   </div>
@@ -322,7 +292,7 @@ export const ReportCard = ({
                 {isSubmitting ? "Reporting..." : "Submit"}
               </Button>
               <Button
-                type="reset"
+                type="button"
                 className="w-44 h-12 bg-white text-black border border-gray-400 hover:bg-red-400 hover:text-white transition-all duration-300"
                 onClick={() => window.location.reload()}
               >
@@ -333,53 +303,36 @@ export const ReportCard = ({
         )}
       </Formik>
 
-      {showModal && uploadedImages.length > 0 && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50 animate-fadeIn">
-          <div className="bg-white rounded-2xl p-6 flex flex-col items-center gap-4 w-80 shadow-2xl relative animate-slideInUp">
-            <h2 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-green-500 to-blue-500 animate-textGlow">
-              Submitted Successfully!
-            </h2>
-            <p className="text-gray-700 text-center font-bold">
-              Your item has been reported. It is under admin review, when it is
-              approved it will be available.
-            </p>
-
-            <div className="relative w-60 h-60 flex items-center justify-center mt-2">
-              {uploadedImages.length > 1 && (
-                <>
-                  <button
-                    onClick={prevImage}
-                    className="absolute left-0 bg-black/50 text-white p-2 rounded-full z-10 hover:bg-black/70 transition"
-                  >
-                    <ArrowLeft />
-                  </button>
-                  <button
-                    onClick={nextImage}
-                    className="absolute right-0 bg-black/50 text-white p-2 rounded-full z-10 hover:bg-black/70 transition"
-                  >
-                    <ArrowRight />
-                  </button>
-                </>
-              )}
-              <Image
-                src={uploadedImages[carouselIndex]?.url || "/placeholder.png"}
-                alt={`Uploaded Image ${carouselIndex + 1}`}
-                fill
-                className="object-cover rounded-lg"
-              />
-              {uploadedImages.length > 1 && (
-                <div className="absolute bottom-2 right-2 bg-black/70 text-white text-sm font-bold px-2 py-1 rounded-full">
-                  {carouselIndex + 1}/{uploadedImages.length}
-                </div>
-              )}
-            </div>
-
-            <Button
-              className="mt-4 w-full bg-gradient-to-r from-blue-400 to-green-400 hover:scale-105 transition-transform duration-300"
-              onClick={() => setShowModal(false)}
-            >
-              Close
-            </Button>
+      <style jsx global>{`
+        @keyframes progress-loading {
+          0% { transform: scaleX(0); }
+          50% { transform: scaleX(0.7); }
+          100% { transform: scaleX(1); }
+        }
+        .animate-progress-loading {
+          animation: progress-loading 2s ease-in-out infinite;
+        }
+      `}</style>
+      {showModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-2xl p-8 max-w-lg w-full shadow-2xl relative">
+            <button onClick={() => setShowModal(false)} className="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
+                <XCircle size={28} />
+            </button>
+            <h2 className="text-3xl font-bold text-center text-green-600 mb-6">Submitted!</h2>
+            <p className="font-bold mb-[20px] flex justify-center items-center">Thank you for helping out our community!</p>
+            {uploadedImages.length > 0 && (
+              <div className="relative w-full h-64 rounded-xl overflow-hidden mb-6 shadow-inner">
+                <Image src={uploadedImages[carouselIndex].secure_url} alt="Item" fill className="object-cover" />
+                {uploadedImages.length > 1 && (
+                  <>
+                    <button onClick={prevImage} className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/80 p-2 rounded-full"><ArrowLeft size={20} /></button>
+                    <button onClick={nextImage} className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/80 p-2 rounded-full"><ArrowRight size={20} /></button>
+                  </>
+                )}
+              </div>
+            )}
+            <Button onClick={() => setShowModal(false)} className="w-full bg-green-600 text-white py-4 rounded-xl font-bold">Done</Button>
           </div>
         </div>
       )}

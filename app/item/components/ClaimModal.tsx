@@ -74,7 +74,6 @@ export const ClaimModal = ({
       setDeleting(false);
     }
   };
-console.log(token)
   if (loading) {
     return (
       <div className="w-full flex justify-center py-10">
@@ -93,7 +92,11 @@ console.log(token)
 
   return (
     <>
-      <Modal open={open} onClose={handleClose} className="flex items-center justify-center p-4">
+      <Modal
+        open={open}
+        onClose={handleClose}
+        className="flex items-center justify-center p-4"
+      >
         <Box
           sx={{
             bgcolor: "background.paper",
@@ -107,7 +110,11 @@ console.log(token)
         >
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-2xl font-bold">Claim Details</h2>
-            <Button variant="ghost" onClick={() => setOpenDelete(true)} disabled={deleting}>
+            <Button
+              variant="ghost"
+              onClick={() => setOpenDelete(true)}
+              disabled={deleting}
+            >
               <Image src="/trash.svg" alt="trash" width={60} height={60} />
             </Button>
           </div>
@@ -129,11 +136,32 @@ console.log(token)
           )}
 
           <div className="space-y-3">
-            <p><span className="font-semibold">Name:</span> {claimData.Name}</p>
-            <p><span className="font-semibold">Email:</span> {claimData.Email}</p>
-            <p><span className="font-semibold">Phone:</span> {claimData.Number}</p>
+            <p>
+              <span className="font-semibold">Name:</span> {claimData.Name}
+            </p>
+            <p>
+              <span className="font-semibold">Email:</span>
+              <a
+                href={`mailto:${claimData.Email}`}
+                className="text-blue-600 hover:underline"
+              >
+                {claimData.Email}
+              </a>
+            </p>
+
+            <p>
+              <span className="font-semibold">Phone:</span>
+              <a
+                href={`tel:${claimData.Number}`}
+                className="text-blue-600 hover:underline"
+              >
+                {claimData.Number}
+              </a>
+            </p>
+
             <p className="whitespace-pre-wrap">
-              <span className="font-semibold">Message:</span> {claimData.claimText}
+              <span className="font-semibold">Message:</span>{" "}
+              {claimData.claimText}
             </p>
           </div>
         </Box>

@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { use, useEffect, useState } from "react";
+import { use, useEffect, useState, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { CircularProgress } from "@mui/material";
 import { useUser } from "@/app/context/UserContext";
@@ -11,12 +11,12 @@ import { getSingleItem } from "@/lib/item/getSingleItemById";
 import { DeleteItem } from "@/lib/item/deleteItem";
 
 import { ClaimCard } from "../components/ClaimCard";
-import { ModalClaim } from "../components/ModalClaim";
-import { ModalUpdateItem } from "../components/UpdateItem";
-import { ClaimModal } from "../components/ClaimModal";
-
 import { ItemProps } from "@/index";
+import { CarouselModal } from "../components/Carousel";
+import { ModalUpdateItem } from "../components/UpdateItem";
+import { ModalClaim } from "../components/ModalClaim";
 import { ModalDelete } from "@/app/components/Modal/ModalDelete";
+import { ClaimModal } from "../components/ClaimModal";
 
 type PageProps = {
   params: Promise<{ id: string }>;
@@ -35,55 +35,56 @@ export default function ItemDetailPage({ params }: PageProps) {
   const [openUpdate, setOpenUpdate] = useState(false);
   const [openDelete, setOpenDelete] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
-  const [openClaimModal, setOpenClaimModal] = useState(false);
   const [selectedClaimId, setSelectedClaimId] = useState<string | null>(null);
+  const [openClaimDetailsModal, setOpenClaimDetailsModal] = useState(false);
 
+  const [isCarouselOpen, setIsCarouselOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(0);
   const CLAIMS_PER_PAGE = 6;
 
-  const handleOpenClaimModal = (claimId: string) => {
-    setSelectedClaimId(claimId);
-    setOpenClaimModal(true);
-  };
-
-  const handleCloseClaimModal = () => {
-    setOpenClaimModal(false);
-    setSelectedClaimId(null);
-  };
-  useEffect(() => {
+  const fetchItem = useCallback(() => {
     if (!id) return;
-
+    setLoading(true);
     getSingleItem<ItemProps>(id)
       .then(setItem)
       .catch((err) => setError(err.message || "Failed to load item"))
       .finally(() => setLoading(false));
   }, [id]);
 
-  if (loading)
-    return (
-      <div className="w-full h-screen flex items-center justify-center">
-        <CircularProgress />
-      </div>
-    );
+  useEffect(() => {
+    fetchItem();
+  }, [fetchItem]);
 
-  if (error)
-    return (
-      <div className="text-center bg-gradient-to-r from-yellow-500 to-blue-400 mt-10 text-red-500">
-        {error}
-      </div>
-    );
-  if (!item)
-    return (
-      <div className="text-center bg-gradient-to-r from-yellow-500 to-blue-400 mt-10">
-        Item not found
-      </div>
-    );
+  if (loading) return (
+    <div className="w-full h-screen flex items-center justify-center">
+      <CircularProgress />
+    </div>
+  );
 
+  if (error || !item) return (
+    <div className="text-center bg-gradient-to-r from-yellow-500 to-blue-400 mt-10 p-10">
+      {error || "Item not found"}
+    </div>
+  );
+
+  const images = [item.mainImage, ...(item.images || [])];
+  const dateOnly = new Date(item.createdAt).toISOString().split("T")[0];
   const isOwner = item.User?._id === user?._id;
+
+  const totalClaims = item.claims?.length || 0;
+  const totalPages = Math.ceil(totalClaims / CLAIMS_PER_PAGE);
+  const paginatedClaims = item.claims?.slice(
+    currentPage * CLAIMS_PER_PAGE,
+    currentPage * CLAIMS_PER_PAGE + CLAIMS_PER_PAGE,
+  );
+
+  const handleOpenClaimDetails = (claimId: string) => {
+    setSelectedClaimId(claimId);
+    setOpenClaimDetailsModal(true);
+  };
 
   const handleDelete = async () => {
     if (!token || !item._id) return;
-
     try {
       setDeleteError(null);
       await DeleteItem(item._id, token);
@@ -91,139 +92,134 @@ export default function ItemDetailPage({ params }: PageProps) {
       router.push("/");
       router.refresh();
     } catch (err: any) {
-      setDeleteError(
-        err?.response?.data?.message || err?.message || "Failed to delete item"
-      );
+      setDeleteError(err?.response?.data?.message || err?.message || "Failed to delete item");
     }
   };
 
-  const totalPages = item.claims
-    ? Math.ceil(item.claims.length / CLAIMS_PER_PAGE)
-    : 0;
-  const paginatedClaims = item.claims?.slice(
-    currentPage * CLAIMS_PER_PAGE,
-    currentPage * CLAIMS_PER_PAGE + CLAIMS_PER_PAGE
-  );
-  const mongoDate = item.createdAt;
-  const dateOnly = new Date(mongoDate).toISOString().split("T")[0];
-
-  console.log(dateOnly);
-
   return (
-    <div className="bg-gradient-to-r from-yellow-500 to-blue-400">
-      <div className="max-w-5xl  mx-auto p-6">
-        <div className="relative w-full h-96 rounded-xl overflow-hidden">
+    <div className="bg-gradient-to-r from-yellow-500 to-blue-400 min-h-screen py-12 px-4 sm:px-6 lg:px-10">
+      <div className="max-w-5xl mx-auto space-y-8">
+        <div
+          className="relative w-full h-96 rounded-xl overflow-hidden shadow-xl cursor-pointer"
+          onClick={() => setIsCarouselOpen(true)}
+        >
           <Image
-            src={item.mainImage?.url || "/file.svg"}
+            src={images[0]?.url || "/file.svg"}
             alt={item.itemname}
             fill
             className="object-cover"
           />
         </div>
 
-        <div className="mt-6 space-y-4">
-          <h1 className="text-4xl font-bold">{item.itemname}</h1>
-          <p className="text-gray-700">{item.description}</p>
-          <h1>{item.contactEmail}</h1>
-          <h1>{item.contactNumber}</h1>
-          <h1>{dateOnly}</h1>
-          <h1>{item.isFound}</h1>
-          <div className="flex gap-4">
-            {user ? (
-              <Button onClick={() => setOpenClaim(true)}>Make Claim</Button>
-            ) : (
-              <p className="text-sm text-red-500">
-                You must be logged in to make a claim.
-              </p>
-            )}
+        <CarouselModal
+          images={images}
+          isOpen={isCarouselOpen}
+          onClose={() => setIsCarouselOpen(false)}
+        />
 
+        <div className="bg-white rounded-2xl shadow-lg p-8 space-y-6">
+          <h1 className="text-4xl font-extrabold text-gray-900">{item.itemname}</h1>
+          <p className="text-gray-700 text-lg">{item.description}</p>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 text-gray-800">
+            <div><h3 className="font-semibold">📧 Email</h3><p>{item.contactEmail}</p></div>
+            <div><h3 className="font-semibold">📞 Phone</h3><p>{item.contactNumber}</p></div>
+            <div><h3 className="font-semibold">📅 Date Reported</h3><p>{dateOnly}</p></div>
+            <div><h3 className="font-semibold">🔎 Status</h3><p>{item.isFound}</p></div>
+            <div><h3 className="font-semibold">🎨 Colors</h3><p>{item.color?.join(", ") || "Unknown"}</p></div>
+            <div><h3 className="font-semibold">👟 Physical Type</h3><p>{item.physical?.join(", ") || "Other"}</p></div>
+            <div><h3 className="font-semibold">📍 Location</h3><p>{item.location}</p></div>
+          </div>
+
+          <div className="flex flex-wrap gap-4 mt-6">
+            {user && !isOwner && (
+              <Button onClick={() => setOpenClaim(true)} className="bg-blue-600 hover:bg-blue-700 text-white">
+                Make Claim
+              </Button>
+            )}
             {user && isOwner && (
               <>
-                <Button onClick={() => setOpenUpdate(true)}>Update Item</Button>
-                <Button
-                  onClick={() => setOpenDelete(true)}
-                  className="bg-transparent hover:bg-transparent"
-                >
-                  <Image src="/trash.svg" alt="trash" width={40} height={40} />
+                <Button onClick={() => setOpenUpdate(true)} className="bg-yellow-500 hover:bg-yellow-600 text-white">
+                  Update Item
+                </Button>
+                <Button onClick={() => setOpenDelete(true)} className="bg-red-500 hover:bg-red-600 text-white">
+                  Delete
                 </Button>
               </>
             )}
           </div>
         </div>
 
-        {user && openClaim && (
-          <ModalClaim
-            open={openClaim}
-            handleClose={() => setOpenClaim(false)}
-            itemId={item._id}
-            userId={user._id}
-            onSuccess={() => console.log("Claim submitted")}
-          />
-        )}
-
-        {user && isOwner && (
-          <ModalUpdateItem
-            open={openUpdate}
-            handleClose={() => setOpenUpdate(false)}
-            item={item}
-          />
-        )}
-
-        {user && isOwner && (
-          <ModalDelete
-            open={openDelete}
-            handleClose={() => setOpenDelete(false)}
-            deleteType={handleDelete}
-            error={deleteError}
-          />
-        )}
-
-        {isOwner && (
-          <div className="w-full bg-white flex flex-col gap-3 mt-8 p-4 rounded-md">
-            {!item.claims || item.claims.length === 0 ? (
-              <p className="text-gray-600">No claims made for this item</p>
-            ) : (
-              <>
-                <div className="grid grid-cols-3 gap-4">
-                  {paginatedClaims?.map((claimId) => (
-                    <div
-                      key={claimId}
-                      onClick={() => handleOpenClaimModal(claimId)}
-                      className="cursor-pointer hover:scale-[1.02] transition-transform"
-                    >
-                      <ClaimCard itemId={item._id} claimId={claimId} />
-                    </div>
-                  ))}
+        {item.claims && isOwner && item.claims.length > 0 && (
+          <div className="rounded-2xl shadow-lg p-6 space-y-4">
+            <h2 className="text-2xl bg-white p-6 rounded-md font-bold">Claims</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+              {paginatedClaims?.map((claimId) => (
+                <div 
+                  key={claimId} 
+                  onClick={() => handleOpenClaimDetails(claimId)}
+                  className="cursor-pointer hover:scale-105 transition-transform"
+                >
+                  <ClaimCard itemId={item._id} claimId={claimId} />
                 </div>
+              ))}
+            </div>
 
-                {totalPages > 1 && (
-                  <div className="flex justify-center items-center gap-2 mt-4">
-                    <Button
-                      disabled={currentPage === 0}
-                      onClick={() => setCurrentPage((prev) => prev - 1)}
-                    >
-                      Previous
-                    </Button>
-                    <span>
-                      Page {currentPage + 1} of {totalPages}
-                    </span>
-                    <Button
-                      disabled={currentPage + 1 >= totalPages}
-                      onClick={() => setCurrentPage((prev) => prev + 1)}
-                    >
-                      Next
-                    </Button>
-                  </div>
-                )}
-              </>
+            {totalPages > 1 && (
+              <div className="flex justify-center items-center gap-4 mt-6 bg-white p-4 rounded-lg">
+                <Button
+                  disabled={currentPage === 0}
+                  onClick={() => setCurrentPage((prev) => prev - 1)}
+                  className="bg-gray-200 text-black hover:bg-gray-300 disabled:opacity-50"
+                >
+                  Previous
+                </Button>
+                <span className="font-medium">
+                  Page {currentPage + 1} of {totalPages}
+                </span>
+                <Button
+                  disabled={currentPage >= totalPages - 1}
+                  onClick={() => setCurrentPage((prev) => prev + 1)}
+                  className="bg-gray-200 text-black hover:bg-gray-300 disabled:opacity-50"
+                >
+                  Next
+                </Button>
+              </div>
             )}
           </div>
         )}
 
-        {openClaimModal && selectedClaimId && user && (
+        {openClaim && user && (
+          <ModalClaim 
+            open={openClaim} 
+            handleClose={() => setOpenClaim(false)} 
+            itemId={item._id} 
+            userId={user._id} 
+            onSuccess={fetchItem} 
+          />
+        )}
+
+        {openUpdate && (
+          <ModalUpdateItem 
+            open={openUpdate} 
+            handleClose={() => { setOpenUpdate(false); fetchItem(); }} 
+            item={item} 
+          />
+        )}
+
+        {openDelete && (
+          <ModalDelete 
+            open={openDelete} 
+            handleClose={() => setOpenDelete(false)} 
+            deleteType={handleDelete} 
+            error={deleteError} 
+          />
+        )}
+
+        {openClaimDetailsModal && selectedClaimId && (
           <ClaimModal
-            open={openClaimModal}
-            handleClose={handleCloseClaimModal}
+            open={openClaimDetailsModal}
+            handleClose={() => { setOpenClaimDetailsModal(false); setSelectedClaimId(null); }}
             itemId={item._id}
             claimId={selectedClaimId}
           />

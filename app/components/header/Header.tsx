@@ -14,6 +14,7 @@ import { useUser } from "../../context/UserContext";
 import { useEffect, useState } from "react";
 import { getSingleUser } from "@/lib/auth/getUser";
 import CircularProgress from "@mui/material/CircularProgress";
+import Image from "next/image";
 
 export const Header = () => {
   const router = useRouter();
@@ -22,143 +23,153 @@ export const Header = () => {
   const [userLoading, setUserLoading] = useState(true);
   const [userData, setUserData] = useState<any>(null);
 
-  const handleSignIn = () => {
-    router.push("/login");
-  };
+  const handleSignIn = () => router.push("/login");
 
   useEffect(() => {
     if (!user?._id) {
       setUserLoading(false);
       return;
     }
-
     const fetchUser = async () => {
       try {
         const data = await getSingleUser(user._id);
         setUserData(data);
-      } catch (error) {
-        console.error("Error retrieving user data", error);
+      } catch (err) {
+        console.error(err);
       } finally {
         setUserLoading(false);
       }
     };
-
     fetchUser();
   }, [token, user?._id]);
 
   const isAdmin = userData?.role === "admin";
 
-  const menuItems = [
+  const navLinks = [
     { label: "Home", href: "/" },
     { label: "Lost", href: "/lost" },
-    { label: "Report Lost", href: "/report-lost" },
     { label: "Found", href: "/found" },
-    { label: "Report Found", href: "/report-found" },
-    ...(user
-      ? [
-          { label: "Profile", href: `/account-info/${user._id}` },
-          { label: "Search", href: "/search" },
-        ]
-      : []),
+     { label: "Report Found", href: "/report-lost" },
+      { label: "Report Lost", href: "/report-found" },
+    ...(user ? [{ label: "Search", href: "/search" }] : []),
   ];
 
   return (
-    <header className="w-full bg-gradient-to-r from-blue-300 to-yellow-300 shadow-md">
-      <div className="max-w-7xl mx-auto flex items-center justify-between h-[80px] px-4 sm:px-6 lg:px-8">
-        <div className="w-[50%] flex justify-center md:justify-start">
+    <header className="w-full bg-gradient-to-r from-blue-300 to-yellow-300 shadow-sm h-16">
+      <div className="max-w-7xl mx-auto flex items-center justify-between h-full px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center h-full">
           <Logo />
         </div>
 
-        <nav className="hidden md:flex items-center gap-2">
-          {userLoading ? (
-            <CircularProgress size={24} className="mx-4" />
-          ) : (
-            <>
-              {isAdmin && user && (
-                <Link href={`/admin/${user._id}`} className="inline-block">
-                  <Button variant="ghost">Admin</Button>
-                </Link>
-              )}
-
-              {menuItems.map((item) => (
-                <Link key={item.href} href={item.href} className="inline-block">
-                  <Button variant="ghost">{item.label}</Button>
-                </Link>
-              ))}
-            </>
-          )}
+        <nav className="hidden md:flex items-center gap-4">
+          {navLinks.map((link) => (
+            <Link key={link.href} href={link.href}>
+              <Button variant="ghost" className="text-sm hover:bg-white hover:text-black px-3 py-1">
+                {link.label}
+              </Button>
+            </Link>
+          ))}
         </nav>
 
-        <div className="hidden md:flex ml-[30px]">
-          {user ? (
-            <Button
-              onClick={logout}
-              className="bg-gray-500 w-[70%] flex justify-center"
-            >
-              Sign Out
-            </Button>
+        <div className="hidden md:flex items-center">
+          {userLoading ? (
+            <CircularProgress size={20} />
+          ) : user ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button className="w-10 h-10 p-0 rounded-full overflow-hidden bg-white shadow-sm">
+                  {userData?.profileImage?.url ? (
+                    <Image
+                      src={userData.profileImage.url}
+                      width={40}
+                      height={40}
+                      alt="Profile"
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-gray-400 flex items-center justify-center text-white font-bold text-sm">
+                      {userData?.name?.[0]?.toUpperCase() || "U"}
+                    </div>
+                  )}
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent side="bottom" className="w-40">
+                <DropdownMenuItem>
+                  <Link href={`/account-info/${user._id}`} className="block w-full">
+                    Profile
+                  </Link>
+                </DropdownMenuItem>
+                {isAdmin && (
+                  <DropdownMenuItem>
+                    <Link href={`/admin/${user._id}`} className="block w-full">
+                      Admin
+                    </Link>
+                  </DropdownMenuItem>
+                )}
+                <DropdownMenuItem>
+                  <Button
+                    onClick={logout}
+                    className="w-full justify-center bg-red-500 hover:bg-red-600 text-white"
+                  >
+                    Sign Out
+                  </Button>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           ) : (
             <Button
               onClick={handleSignIn}
-              className="bg-green-500 w-[70%] flex justify-center"
+              className="bg-green-500 hover:bg-green-600 text-white text-sm px-3 py-1"
             >
               Sign In
             </Button>
           )}
         </div>
-
-        <div className="md:hidden flex items-center">
+        <div className="md:hidden">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button className="bg-gray-500">Menu</Button>
+              <Button className="bg-gray-500 w-10 h-10">☰</Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent
-              side="bottom"
-              className="w-40 animate-in fade-in-0 slide-in-from-top-2 animate-out fade-out-0 slide-out-to-top-2 duration-300"
-            >
-              {userLoading ? (
-                <div className="flex justify-center p-2">
-                  <CircularProgress size={24} />
-                </div>
-              ) : (
+            <DropdownMenuContent side="bottom" className="w-48">
+              {navLinks.map((link) => (
+                <DropdownMenuItem key={link.href}>
+                  <Link href={link.href} className="block w-full">
+                    {link.label}
+                  </Link>
+                </DropdownMenuItem>
+              ))}
+              {user && (
                 <>
-                  {isAdmin && user && (
+                  <DropdownMenuItem>
+                    <Link href={`/account-info/${user._id}`} className="block w-full">
+                      Profile
+                    </Link>
+                  </DropdownMenuItem>
+                  {isAdmin && (
                     <DropdownMenuItem>
-                      <Link
-                        href={`/admin/${user._id}`}
-                        className="w-full block"
-                      >
+                      <Link href={`/admin/${user._id}`} className="block w-full">
                         Admin
                       </Link>
                     </DropdownMenuItem>
                   )}
-
-                  {menuItems.map((item) => (
-                    <DropdownMenuItem key={item.href}>
-                      <Link href={item.href} className="w-full block">
-                        {item.label}
-                      </Link>
-                    </DropdownMenuItem>
-                  ))}
-
                   <DropdownMenuItem>
-                    {user ? (
-                      <Button
-                        onClick={logout}
-                        className="bg-gray-500 w-full flex justify-center"
-                      >
-                        Sign Out
-                      </Button>
-                    ) : (
-                      <Button
-                        onClick={handleSignIn}
-                        className="bg-green-500 w-full flex justify-center"
-                      >
-                        Sign In
-                      </Button>
-                    )}
+                    <Button
+                      onClick={logout}
+                      className="w-full justify-center bg-red-500 hover:bg-red-600 text-white"
+                    >
+                      Sign Out
+                    </Button>
                   </DropdownMenuItem>
                 </>
+              )}
+              {!user && (
+                <DropdownMenuItem>
+                  <Button
+                    onClick={handleSignIn}
+                    className="w-full justify-center bg-green-500 hover:bg-green-600 text-white"
+                  >
+                    Sign In
+                  </Button>
+                </DropdownMenuItem>
               )}
             </DropdownMenuContent>
           </DropdownMenu>
