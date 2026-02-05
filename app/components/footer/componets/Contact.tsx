@@ -1,5 +1,5 @@
 import Image from "next/image";
-import React from "react";
+
 
 export const Contact = () => {
   return (
@@ -13,7 +13,7 @@ export const Contact = () => {
       </a>
 
       <div className="mt-5 flex gap-x-5">
-        <a className="underline" className="underline" href="https://github.com/Boorchibat">
+        <a  className="underline" href="https://github.com/Boorchibat">
           <div className="rounded-4xl bg-yellow-100 items-center flex justify-center w-[40px] h-[40px]">
             <Image src="../github.svg" alt="image" width={20} height={20} />
           </div>
