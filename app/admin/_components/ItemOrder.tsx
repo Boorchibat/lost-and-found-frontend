@@ -1,17 +1,17 @@
 export const ItemOrder = () => {
   return (
-    <div className="flex bg-gray-500 rounded-t-md border-black border-b">
-      <div className="w-[30%] flex items-center p-2 border-r border-black">
-        <h1 className="font-bold text-[20px] text-white">Name:</h1>
+ <div className="hidden md:flex bg-gray-500 border-b border-black">
+      <div className="w-[30%] p-3 border-r border-black font-bold text-white">
+        Name
       </div>
-      <div className="w-[30%] flex items-center p-2 border-r border-black">
-        <h1 className="font-bold text-[20px] text-white">Item name:</h1>
+      <div className="w-[30%] p-3 border-r border-black font-bold text-white">
+        Item name
       </div>
-      <div className="w-[10%] flex items-center p-2 border-r border-black">
-        <h1 className="font-bold text-[20px] text-white">Item preview</h1>
+      <div className="w-[10%] p-3 border-r border-black font-bold text-white">
+        Preview
       </div>
-      <div className="w-[30%] flex items-center p-2 justify-center">
-        <h1 className="font-bold text-[20px] text-white">Accept or reject</h1>
+      <div className="w-[30%] p-3 font-bold text-white text-center">
+        Actions
       </div>
     </div>
   );

@@ -3,19 +3,39 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Formik, Form, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import { PostItem } from "@/lib/item/postItem";
 import { uploadToCloudinary } from "@/lib/cloudinary/UploadToCloudinary";
 import { useUser } from "@/app/context/UserContext";
 import { ArrowLeft, ArrowRight, XCircle } from "lucide-react";
+import { getItems } from "@/lib/getDataFromBackend";
+import { ItemProps } from "@/index";
+import { MatchModal } from "./components/MatchModal";
 
 const colors = [
-  "Red", "Blue", "Green", "Yellow", "Black", "White", "Purple", "Orange", "Brown", "Gray", "other"
+  "Red",
+  "Blue",
+  "Green",
+  "Yellow",
+  "Black",
+  "White",
+  "Purple",
+  "Orange",
+  "Brown",
+  "Gray",
+  "other",
 ];
 const physicalTypes = [
-  "Backpack", "Clothes", "Shoes", "Hat", "Airpods", "Laptop Charger", "Notebook", "other"
+  "Backpack",
+  "Clothes",
+  "Shoes",
+  "Hat",
+  "Airpods",
+  "Laptop Charger",
+  "Notebook",
+  "other",
 ];
 
 const ReportSchema = Yup.object().shape({
@@ -45,6 +65,18 @@ export const ReportCard = ({
   const [showModal, setShowModal] = useState(false);
   const [carouselIndex, setCarouselIndex] = useState(0);
   const [uploading, setUploading] = useState(false);
+  const [Data, setData] = useState<ItemProps[]>([]);
+  const [matchedItems, setMatchedItems] = useState<ItemProps[]>([]);
+  const [showMatchModal, setShowMatchModal] = useState(false);
+  const [pendingSubmit, setPendingSubmit] = useState<
+    null | (() => Promise<void>)
+  >(null);
+
+  useEffect(() => {
+    getItems<ItemProps[]>("/item").then(setData).catch(console.error);
+  }, []);
+
+  const foundData = Data.filter((item) => item.isFound === "Found");
 
   if (!user || !token)
     return (
@@ -53,26 +85,30 @@ export const ReportCard = ({
       </div>
     );
 
+  const findMatchingItems = (itemname: string) => {
+    return foundData.filter(
+      (item) =>
+        item.itemname.trim().toLowerCase() === itemname.trim().toLowerCase(),
+    );
+  };
+
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
     if (!files.length) return;
-
     const invalid = files.find((f) => !f.type.startsWith("image/"));
     if (invalid) {
       setUploadMessage("❌ All files must be images");
       return;
     }
-
     setImages((prev) => {
       const combined = [...prev, ...files];
       const unique = combined.filter(
         (file, index, self) =>
           index ===
-          self.findIndex((f) => f.name === file.name && f.size === file.size)
+          self.findIndex((f) => f.name === file.name && f.size === file.size),
       );
       return unique;
     });
-
     setUploadMessage("✅ Image(s) added");
     e.target.value = "";
   };
@@ -81,12 +117,11 @@ export const ReportCard = ({
     setImages((prev) => prev.filter((_, i) => i !== index));
     if (images.length <= 1) setUploadMessage("");
   };
-
   const nextImage = () =>
     setCarouselIndex((prev) => (prev + 1) % uploadedImages.length);
   const prevImage = () =>
     setCarouselIndex(
-      (prev) => (prev - 1 + uploadedImages.length) % uploadedImages.length
+      (prev) => (prev - 1 + uploadedImages.length) % uploadedImages.length,
     );
 
   return (
@@ -104,52 +139,62 @@ export const ReportCard = ({
         }}
         validationSchema={ReportSchema}
         onSubmit={async (values, { setSubmitting, resetForm }) => {
-          if (!images.length) {
-            alert("Please upload at least one image");
+          const shouldCheckMatches = title === "Report a lost Item";
+          const matches = shouldCheckMatches
+            ? findMatchingItems(values.itemname)
+            : [];
+
+          const submitLogic = async () => {
+            if (!images.length) {
+              alert("Please upload at least one image");
+              return;
+            }
+            try {
+              setUploading(true);
+              const uploaded = await Promise.all(
+                images.map((img) => uploadToCloudinary(img)),
+              );
+              setUploadedImages(uploaded);
+              const payload = {
+                name: values.name,
+                itemname: values.itemname,
+                location: values.location,
+                description: values.description,
+                contactNumber: Number(values.contactNumber),
+                contactEmail: values.contactEmail,
+                User: user._id,
+                isFound,
+                mainImage: {
+                  url: uploaded[0].secure_url,
+                  public_id: uploaded[0].public_id,
+                },
+                images: uploaded.map((img) => ({
+                  url: img.secure_url,
+                  public_id: img.public_id,
+                })),
+                color: values.color,
+                physical: values.physical,
+              };
+              await PostItem(payload, token);
+              setShowModal(true);
+              resetForm();
+              setImages([]);
+              setUploadMessage("");
+            } finally {
+              setUploading(false);
+              setSubmitting(false);
+            }
+          };
+
+          if (matches.length > 0) {
+            setMatchedItems(matches);
+            setShowMatchModal(true);
+            setPendingSubmit(() => submitLogic);
+            setSubmitting(false);
             return;
           }
 
-          try {
-            setUploading(true);
-            const uploaded = await Promise.all(
-              images.map((img) => uploadToCloudinary(img))
-            );
-            setUploadedImages(uploaded);
-
-            const payload = {
-              name: values.name,
-              itemname: values.itemname,
-              location: values.location,
-              description: values.description,
-              contactNumber: Number(values.contactNumber),
-              contactEmail: values.contactEmail,
-              User: user._id,
-              isFound,
-              mainImage: {
-                url: uploaded[0].secure_url,
-                public_id: uploaded[0].public_id,
-              },
-              images: uploaded.map((img) => ({
-                url: img.secure_url,
-                public_id: img.public_id,
-              })),
-              color: values.color,
-              physical: values.physical,
-            };
-
-            await PostItem(payload, token);
-            setShowModal(true);
-            setCarouselIndex(0);
-            resetForm();
-            setImages([]);
-            setUploadMessage("");
-          } catch (error: any) {
-            console.error(error);
-            alert("Failed to report item");
-          } finally {
-            setUploading(false);
-            setSubmitting(false);
-          }
+          await submitLogic();
         }}
       >
         {({
@@ -173,7 +218,10 @@ export const ReportCard = ({
               { label: "Phone", name: "contactNumber" },
               { label: "Email", name: "contactEmail" },
             ].map((field) => (
-              <div key={field.name} className="w-full flex flex-col sm:flex-row items-center gap-4">
+              <div
+                key={field.name}
+                className="w-full flex flex-col sm:flex-row items-center gap-4"
+              >
                 <h1 className="font-semibold text-lg w-32">{field.label}:</h1>
                 <Input
                   type="text"
@@ -182,9 +230,12 @@ export const ReportCard = ({
                   onChange={handleChange}
                   className="w-full sm:w-2/3 border-2 border-gray-300 focus:border-blue-400 focus:ring focus:ring-blue-200 rounded-md shadow-sm transition-all duration-300"
                 />
-                {touched[field.name as keyof typeof touched] && errors[field.name as keyof typeof errors] && (
-                    <p className="text-red-600 text-sm ml-1 mt-1"><ErrorMessage name={field.name} /></p>
-                )}
+                {touched[field.name as keyof typeof touched] &&
+                  errors[field.name as keyof typeof errors] && (
+                    <p className="text-red-600 text-sm ml-1 mt-1">
+                      <ErrorMessage name={field.name} />
+                    </p>
+                  )}
               </div>
             ))}
 
@@ -195,10 +246,15 @@ export const ReportCard = ({
                   <Button
                     type="button"
                     key={color}
-                    variant={values.color.includes(color) ? "default" : "outline"}
+                    variant={
+                      values.color.includes(color) ? "default" : "outline"
+                    }
                     onClick={() => {
                       if (values.color.includes(color))
-                        setFieldValue("color", values.color.filter((c) => c !== color));
+                        setFieldValue(
+                          "color",
+                          values.color.filter((c) => c !== color),
+                        );
                       else setFieldValue("color", [...values.color, color]);
                     }}
                   >
@@ -215,11 +271,17 @@ export const ReportCard = ({
                   <Button
                     type="button"
                     key={type}
-                    variant={values.physical.includes(type) ? "default" : "outline"}
+                    variant={
+                      values.physical.includes(type) ? "default" : "outline"
+                    }
                     onClick={() => {
                       if (values.physical.includes(type))
-                        setFieldValue("physical", values.physical.filter((p) => p !== type));
-                      else setFieldValue("physical", [...values.physical, type]);
+                        setFieldValue(
+                          "physical",
+                          values.physical.filter((p) => p !== type),
+                        );
+                      else
+                        setFieldValue("physical", [...values.physical, type]);
                     }}
                   >
                     {type}
@@ -243,12 +305,19 @@ export const ReportCard = ({
                   htmlFor="upload"
                   className="flex items-center justify-center gap-2 border border-gray-400 rounded-lg p-2 cursor-pointer bg-white hover:bg-gradient-to-r hover:from-green-400 hover:to-blue-400 transition-all duration-300 shadow-md"
                 >
-                  <Image src="/upload.svg" alt="Upload" width={30} height={30} />
+                  <Image
+                    src="/upload.svg"
+                    alt="Upload"
+                    width={30}
+                    height={30}
+                  />{" "}
                   Upload Images
                 </label>
-                
+
                 {uploadMessage && (
-                  <p className={`mt-2 font-semibold ${uploadMessage.includes("❌") ? "text-red-600" : "text-green-600"}`}>
+                  <p
+                    className={`mt-2 font-semibold ${uploadMessage.includes("❌") ? "text-red-600" : "text-green-600"}`}
+                  >
                     {uploadMessage}
                   </p>
                 )}
@@ -262,7 +331,10 @@ export const ReportCard = ({
                 {images.length > 0 && (
                   <div className="flex flex-wrap gap-3 mt-4">
                     {images.map((file, index) => (
-                      <div key={index} className="w-24 h-24 relative rounded-lg overflow-hidden shadow-md border group">
+                      <div
+                        key={index}
+                        className="w-24 h-24 relative rounded-lg overflow-hidden shadow-md border group"
+                      >
                         <Image
                           src={URL.createObjectURL(file)}
                           alt={`preview-${index}`}
@@ -305,36 +377,82 @@ export const ReportCard = ({
 
       <style jsx global>{`
         @keyframes progress-loading {
-          0% { transform: scaleX(0); }
-          50% { transform: scaleX(0.7); }
-          100% { transform: scaleX(1); }
+          0% {
+            transform: scaleX(0);
+          }
+          50% {
+            transform: scaleX(0.7);
+          }
+          100% {
+            transform: scaleX(1);
+          }
         }
         .animate-progress-loading {
           animation: progress-loading 2s ease-in-out infinite;
         }
       `}</style>
+
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75 backdrop-blur-sm p-4">
           <div className="bg-white rounded-2xl p-8 max-w-lg w-full shadow-2xl relative">
-            <button onClick={() => setShowModal(false)} className="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
-                <XCircle size={28} />
+            <button
+              onClick={() => setShowModal(false)}
+              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"
+            >
+              <XCircle size={28} />
             </button>
-            <h2 className="text-3xl font-bold text-center text-green-600 mb-6">Submitted!</h2>
-            <p className="font-bold mb-[20px] flex justify-center items-center">Thank you for helping out our community!</p>
+            <h2 className="text-3xl font-bold text-center text-green-600 mb-6">
+              Submitted!
+            </h2>
+            <p className="font-bold mb-[20px] flex justify-center items-center">
+              Thank you for helping out our community!
+            </p>
             {uploadedImages.length > 0 && (
               <div className="relative w-full h-64 rounded-xl overflow-hidden mb-6 shadow-inner">
-                <Image src={uploadedImages[carouselIndex].secure_url} alt="Item" fill className="object-cover" />
+                <Image
+                  src={uploadedImages[carouselIndex].secure_url}
+                  alt="Item"
+                  fill
+                  className="object-cover"
+                />
                 {uploadedImages.length > 1 && (
                   <>
-                    <button onClick={prevImage} className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/80 p-2 rounded-full"><ArrowLeft size={20} /></button>
-                    <button onClick={nextImage} className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/80 p-2 rounded-full"><ArrowRight size={20} /></button>
+                    <button
+                      onClick={prevImage}
+                      className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/80 p-2 rounded-full"
+                    >
+                      <ArrowLeft size={20} />
+                    </button>
+                    <button
+                      onClick={nextImage}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/80 p-2 rounded-full"
+                    >
+                      <ArrowRight size={20} />
+                    </button>
                   </>
                 )}
               </div>
             )}
-            <Button onClick={() => setShowModal(false)} className="w-full bg-green-600 text-white py-4 rounded-xl font-bold">Done</Button>
+            <Button
+              onClick={() => setShowModal(false)}
+              className="w-full bg-green-600 text-white py-4 rounded-xl font-bold"
+            >
+              Done
+            </Button>
           </div>
         </div>
+      )}
+
+      {showMatchModal && matchedItems.length > 0 && (
+        <MatchModal
+          open={showMatchModal}
+          items={matchedItems}
+          onClose={() => setShowMatchModal(false)}
+          onContinue={async () => {
+            setShowMatchModal(false);
+            if (pendingSubmit) await pendingSubmit();
+          }}
+        />
       )}
     </>
   );

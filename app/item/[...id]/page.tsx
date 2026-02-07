@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { use, useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, use } from "react";
 import { Button } from "@/components/ui/button";
 import { CircularProgress } from "@mui/material";
 import { useUser } from "@/app/context/UserContext";
@@ -40,7 +40,10 @@ export default function ItemDetailPage({ params }: PageProps) {
 
   const [isCarouselOpen, setIsCarouselOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(0);
+  const [imageIndex, setImageIndex] = useState(0);
   const CLAIMS_PER_PAGE = 6;
+
+  const [descriptionExpanded, setDescriptionExpanded] = useState(false);
 
   const fetchItem = useCallback(() => {
     if (!id) return;
@@ -55,27 +58,28 @@ export default function ItemDetailPage({ params }: PageProps) {
     fetchItem();
   }, [fetchItem]);
 
-  if (loading) return (
-    <div className="w-full h-screen flex items-center justify-center">
-      <CircularProgress />
-    </div>
-  );
+  if (loading)
+    return (
+      <div className="w-full h-screen flex items-center bg-gradient-to-r from-yellow-500 to-blue-400 justify-center">
+        <CircularProgress />
+      </div>
+    );
 
-  if (error || !item) return (
-    <div className="text-center bg-gradient-to-r from-yellow-500 to-blue-400 mt-10 p-10">
-      {error || "Item not found"}
-    </div>
-  );
+  if (error || !item)
+    return (
+      <div className="text-center bg-gradient-to-r from-yellow-500 to-blue-400 mt-10 p-10">
+        {error || "Item not found"}
+      </div>
+    );
 
   const images = [item.mainImage, ...(item.images || [])];
   const dateOnly = new Date(item.createdAt).toISOString().split("T")[0];
   const isOwner = item.User?._id === user?._id;
-
   const totalClaims = item.claims?.length || 0;
   const totalPages = Math.ceil(totalClaims / CLAIMS_PER_PAGE);
   const paginatedClaims = item.claims?.slice(
     currentPage * CLAIMS_PER_PAGE,
-    currentPage * CLAIMS_PER_PAGE + CLAIMS_PER_PAGE,
+    currentPage * CLAIMS_PER_PAGE + CLAIMS_PER_PAGE
   );
 
   const handleOpenClaimDetails = (claimId: string) => {
@@ -96,39 +100,72 @@ export default function ItemDetailPage({ params }: PageProps) {
     }
   };
 
+  const truncatedDescription =
+    item.description.length > 100 && !descriptionExpanded
+      ? item.description.slice(0, 100) + "..."
+      : item.description;
+
   return (
     <div className="bg-gradient-to-r from-yellow-500 to-blue-400 min-h-screen py-12 px-4 sm:px-6 lg:px-10">
-      <div className="max-w-5xl mx-auto space-y-8">
-        <div
-          className="relative w-full h-96 rounded-xl overflow-hidden shadow-xl cursor-pointer"
-          onClick={() => setIsCarouselOpen(true)}
-        >
-          <Image
-            src={images[0]?.url || "/file.svg"}
-            alt={item.itemname}
-            fill
-            className="object-cover"
-          />
+      <div className="max-w-7xl mx-auto flex flex-col lg:flex-row gap-8">
+        <div className="flex-1 flex flex-col gap-6">
+          <div
+            className="relative w-full h-100 rounded-xl overflow-hidden bg-gray-100 cursor-pointer"
+            onClick={() => setIsCarouselOpen(true)}
+          >
+            <Image
+              src={images[imageIndex]?.url || "/file.svg"}
+              alt={item.itemname}
+              fill
+              className="object-contain"
+            />
+          </div>
+
+          <div className="bg-white rounded-2xl shadow-lg p-6 space-y-4">
+            <h3 className="font-semibold text-lg">🎨 Colors</h3>
+            <p>{item.color?.join(", ") || "Unknown"}</p>
+
+            <h3 className="font-semibold text-lg">👟 Physical Type</h3>
+            <p>{item.physical?.join(", ") || "Other"}</p>
+          </div>
         </div>
 
-        <CarouselModal
-          images={images}
-          isOpen={isCarouselOpen}
-          onClose={() => setIsCarouselOpen(false)}
-        />
-
-        <div className="bg-white rounded-2xl shadow-lg p-8 space-y-6">
+        <div className="flex-1 bg-white rounded-2xl shadow-lg p-8 space-y-6">
           <h1 className="text-4xl font-extrabold text-gray-900">{item.itemname}</h1>
-          <p className="text-gray-700 text-lg">{item.description}</p>
+
+          <p className="text-gray-700 text-lg">
+            {truncatedDescription}
+            {item.description.length > 100 && (
+              <button
+                onClick={() => setDescriptionExpanded((prev) => !prev)}
+                className="ml-2 text-blue-600 font-semibold"
+              >
+                {descriptionExpanded ? "See Less" : "See More"}
+              </button>
+            )}
+          </p>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 text-gray-800">
-            <div><h3 className="font-semibold">📧 Email</h3><p>{item.contactEmail}</p></div>
-            <div><h3 className="font-semibold">📞 Phone</h3><p>{item.contactNumber}</p></div>
-            <div><h3 className="font-semibold">📅 Date Reported</h3><p>{dateOnly}</p></div>
-            <div><h3 className="font-semibold">🔎 Status</h3><p>{item.isFound}</p></div>
-            <div><h3 className="font-semibold">🎨 Colors</h3><p>{item.color?.join(", ") || "Unknown"}</p></div>
-            <div><h3 className="font-semibold">👟 Physical Type</h3><p>{item.physical?.join(", ") || "Other"}</p></div>
-            <div><h3 className="font-semibold">📍 Location</h3><p>{item.location}</p></div>
+            <div>
+              <h3 className="font-semibold">📧 Email</h3>
+              <p>{item.contactEmail}</p>
+            </div>
+            <div>
+              <h3 className="font-semibold">📞 Phone</h3>
+              <p>{item.contactNumber}</p>
+            </div>
+            <div>
+              <h3 className="font-semibold">📅 Date Reported</h3>
+              <p>{dateOnly}</p>
+            </div>
+            <div>
+              <h3 className="font-semibold">🔎 Status</h3>
+              <p>{item.isFound}</p>
+            </div>
+            <div>
+              <h3 className="font-semibold">📍 Location</h3>
+              <p>{item.location}</p>
+            </div>
           </div>
 
           <div className="flex flex-wrap gap-4 mt-6">
@@ -149,82 +186,93 @@ export default function ItemDetailPage({ params }: PageProps) {
             )}
           </div>
         </div>
-
-        {item.claims && isOwner && item.claims.length > 0 && (
-          <div className="rounded-2xl shadow-lg p-6 space-y-4">
-            <h2 className="text-2xl bg-white p-6 rounded-md font-bold">Claims</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-              {paginatedClaims?.map((claimId) => (
-                <div 
-                  key={claimId} 
-                  onClick={() => handleOpenClaimDetails(claimId)}
-                  className="cursor-pointer hover:scale-105 transition-transform"
-                >
-                  <ClaimCard itemId={item._id} claimId={claimId} />
-                </div>
-              ))}
-            </div>
-
-            {totalPages > 1 && (
-              <div className="flex justify-center items-center gap-4 mt-6 bg-white p-4 rounded-lg">
-                <Button
-                  disabled={currentPage === 0}
-                  onClick={() => setCurrentPage((prev) => prev - 1)}
-                  className="bg-gray-200 text-black hover:bg-gray-300 disabled:opacity-50"
-                >
-                  Previous
-                </Button>
-                <span className="font-medium">
-                  Page {currentPage + 1} of {totalPages}
-                </span>
-                <Button
-                  disabled={currentPage >= totalPages - 1}
-                  onClick={() => setCurrentPage((prev) => prev + 1)}
-                  className="bg-gray-200 text-black hover:bg-gray-300 disabled:opacity-50"
-                >
-                  Next
-                </Button>
-              </div>
-            )}
-          </div>
-        )}
-
-        {openClaim && user && (
-          <ModalClaim 
-            open={openClaim} 
-            handleClose={() => setOpenClaim(false)} 
-            itemId={item._id} 
-            userId={user._id} 
-            onSuccess={fetchItem} 
-          />
-        )}
-
-        {openUpdate && (
-          <ModalUpdateItem 
-            open={openUpdate} 
-            handleClose={() => { setOpenUpdate(false); fetchItem(); }} 
-            item={item} 
-          />
-        )}
-
-        {openDelete && (
-          <ModalDelete 
-            open={openDelete} 
-            handleClose={() => setOpenDelete(false)} 
-            deleteType={handleDelete} 
-            error={deleteError} 
-          />
-        )}
-
-        {openClaimDetailsModal && selectedClaimId && (
-          <ClaimModal
-            open={openClaimDetailsModal}
-            handleClose={() => { setOpenClaimDetailsModal(false); setSelectedClaimId(null); }}
-            itemId={item._id}
-            claimId={selectedClaimId}
-          />
-        )}
       </div>
+
+      {item.claims && isOwner && item.claims.length > 0 && (
+        <div className="rounded-2xl bg-gray-500 shadow-lg p-6 space-y-4 mt-8">
+          <h2 className="text-2xl bg-white p-6 rounded-md font-bold">Claims</h2>
+          <div className="flex flex-wrap gap-6 mt-4 justify-evenly">
+            {paginatedClaims?.map((claimId) => (
+              <div
+                key={claimId}
+                onClick={() => handleOpenClaimDetails(claimId)}
+                className="cursor-pointer hover:scale-105 transition-transform"
+              >
+                <ClaimCard itemId={item._id} claimId={claimId} />
+              </div>
+            ))}
+          </div>
+          {totalPages > 1 && (
+            <div className="flex justify-center items-center gap-4 mt-6 bg-white p-4 rounded-lg">
+              <Button
+                disabled={currentPage === 0}
+                onClick={() => setCurrentPage((prev) => prev - 1)}
+                className="bg-gray-200 text-black hover:bg-gray-300 disabled:opacity-50"
+              >
+                Previous
+              </Button>
+              <span className="font-medium">
+                Page {currentPage + 1} of {totalPages}
+              </span>
+              <Button
+                disabled={currentPage >= totalPages - 1}
+                onClick={() => setCurrentPage((prev) => prev + 1)}
+                className="bg-gray-200 text-black hover:bg-gray-300 disabled:opacity-50"
+              >
+                Next
+              </Button>
+            </div>
+          )}
+        </div>
+      )}
+
+      {openClaim && user && (
+        <ModalClaim
+          open={openClaim}
+          handleClose={() => setOpenClaim(false)}
+          itemId={item._id}
+          userId={user._id}
+          onSuccess={fetchItem}
+        />
+      )}
+
+      {openUpdate && (
+        <ModalUpdateItem
+          open={openUpdate}
+          handleClose={() => {
+            setOpenUpdate(false);
+            fetchItem();
+          }}
+          item={item}
+        />
+      )}
+
+      {openDelete && (
+        <ModalDelete
+          open={openDelete}
+          handleClose={() => setOpenDelete(false)}
+          deleteType={handleDelete}
+          error={deleteError}
+        />
+      )}
+
+      {openClaimDetailsModal && selectedClaimId && (
+        <ClaimModal
+          open={openClaimDetailsModal}
+          handleClose={() => {
+            setOpenClaimDetailsModal(false);
+            setSelectedClaimId(null);
+          }}
+          itemId={item._id}
+          claimId={selectedClaimId}
+        />
+      )}
+
+      <CarouselModal
+        images={images}
+        isOpen={isCarouselOpen}
+        onClose={() => setIsCarouselOpen(false)}
+      />
     </div>
   );
 }

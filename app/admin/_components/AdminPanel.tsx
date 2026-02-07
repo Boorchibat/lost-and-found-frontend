@@ -7,7 +7,7 @@ import { useUser } from "@/app/context/UserContext";
 
 export const AdminPanel = () => {
   const [items, setItems] = useState<ItemProps[]>([]);
-  const {loading} = useUser()
+  const { loading } = useUser();
 
   useEffect(() => {
     getItems<ItemProps[]>("/item")
@@ -22,13 +22,12 @@ export const AdminPanel = () => {
   };
 
   return (
-    <div className="w-[70%] h-auto bg-white rounded-md flex flex-col">
+    <div className="w-full md:w-[90%] lg:w-[80%] mx-auto bg-white rounded-md flex flex-col overflow-hidden">
       <ItemOrder />
-
-        {loading ? (
-        <p className="text-center py-4">Loading items...</p>
+      {loading ? (
+        <p className="text-center py-6">Loading items...</p>
       ) : items.length === 0 ? (
-        <p className="text-center py-4 text-gray-500 font-semibold">
+        <p className="text-center py-6 text-gray-500 font-semibold">
           No new items need approval
         </p>
       ) : (

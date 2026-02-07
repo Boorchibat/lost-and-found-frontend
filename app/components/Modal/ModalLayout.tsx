@@ -40,7 +40,7 @@ export const ModalLayout = ({ open, handleClose, Data }: ModalProps) => {
 
   if (!token) {
     return (
-      <div className="p-4">
+      <div className="p-4 mt-[20px]">
         User not logged in. Go back{" "}
         <a className="underline" href="/">
           Home

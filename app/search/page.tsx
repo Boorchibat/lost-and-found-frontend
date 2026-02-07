@@ -10,13 +10,29 @@ import { LoaderCircle } from "lucide-react";
 import { ItemProps } from "@/index";
 
 const COLORS = [
-  "Red", "Blue", "Yellow", "Green", "Black", "White",
-  "Gray", "Orange", "Purple", "Pink", "Brown", "Other",
+  "Red",
+  "Blue",
+  "Yellow",
+  "Green",
+  "Black",
+  "White",
+  "Gray",
+  "Orange",
+  "Purple",
+  "Pink",
+  "Brown",
+  "Other",
 ];
 
 const PHYSICAL_TYPES = [
-  "Backpack", "Clothes", "Shoes", "Hat", "AirPods",
-  "Laptop Charger", "Notebook", "Other",
+  "Backpack",
+  "Clothes",
+  "Shoes",
+  "Hat",
+  "AirPods",
+  "Laptop Charger",
+  "Notebook",
+  "Other",
 ];
 
 export const Search = () => {
@@ -31,41 +47,40 @@ export const Search = () => {
   }, []);
 
   const toggleColor = (color: string) => {
-    setSelectedColors(prev =>
-      prev.includes(color) ? prev.filter(c => c !== color) : [...prev, color]
+    setSelectedColors((prev) =>
+      prev.includes(color) ? prev.filter((c) => c !== color) : [...prev, color],
     );
   };
 
   const togglePhysical = (type: string) => {
-    setSelectedPhysical(prev =>
-      prev.includes(type) ? prev.filter(t => t !== type) : [...prev, type]
+    setSelectedPhysical((prev) =>
+      prev.includes(type) ? prev.filter((t) => t !== type) : [...prev, type],
     );
   };
 
-  const approvedData = Data.filter(item => item.status === "approved");
-  const filteredData = approvedData.filter(item => {
+  const approvedData = Data.filter((item) => item.status === "approved");
+  const filteredData = approvedData.filter((item) => {
     const matchesSearch =
       item.itemname.toLowerCase().includes(searchTerm.toLowerCase()) ||
       item.description.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesColor =
       selectedColors.length === 0 ||
-      item.color?.some(c => selectedColors.includes(c));
+      item.color?.some((c) => selectedColors.includes(c));
     const matchesPhysical =
       selectedPhysical.length === 0 ||
-      item.physical?.some(p => selectedPhysical.includes(p));
+      item.physical?.some((p) => selectedPhysical.includes(p));
     return matchesSearch && matchesColor && matchesPhysical;
   });
 
   return (
     <div className="w-full min-h-screen bg-gradient-to-r from-yellow-300 to-blue-200 flex justify-center px-4 py-10">
       <div className="max-w-7xl w-full flex flex-col lg:flex-row gap-8">
-
         <div className="w-full lg:w-1/4 bg-white rounded-2xl shadow-lg p-6 space-y-6 self-start lg:mt-30">
           <h2 className="text-2xl font-bold text-gray-900">Filters</h2>
           <div>
             <h3 className="font-semibold text-gray-800 mb-2">Colors</h3>
             <div className="flex flex-wrap gap-2">
-              {COLORS.map(color => (
+              {COLORS.map((color) => (
                 <Button
                   key={color}
                   onClick={() => toggleColor(color)}
@@ -84,7 +99,7 @@ export const Search = () => {
           <div>
             <h3 className="font-semibold text-gray-800 mb-2">Physical Type</h3>
             <div className="flex flex-wrap gap-2">
-              {PHYSICAL_TYPES.map(type => (
+              {PHYSICAL_TYPES.map((type) => (
                 <Button
                   key={type}
                   onClick={() => togglePhysical(type)}
@@ -102,10 +117,12 @@ export const Search = () => {
         </div>
 
         <div className="flex-1 flex flex-col items-center gap-8">
-          <h1 className="mb-6 font-bold lg:text-[70px] text-4xl text-gray-900">
-            Search for an Item
-          </h1>
-          <Searchbar setQuery={setSearchTerm} />
+          <div className="lg:mr-[250px] w-full flex flex-col justify-center items-center">
+            <h1 className="mb-6 font-bold lg:text-[70px] text-4xl text-gray-900">
+              Search for an Item
+            </h1>
+            <Searchbar setQuery={setSearchTerm} />
+          </div>
 
           <div className="mt-6 w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 justify-items-center gap-6">
             {loading ? (
@@ -113,7 +130,9 @@ export const Search = () => {
                 <LoaderCircle size={60} color="#2563eb" />
               </div>
             ) : filteredData.length > 0 ? (
-              filteredData.map(item => <ReportCard key={item._id} {...item} />)
+              filteredData.map((item) => (
+                <ReportCard key={item._id} {...item} />
+              ))
             ) : (
               <div className="w-full flex flex-col justify-center items-center gap-4 mt-10 col-span-3">
                 <h1 className="font-bold text-2xl">No items found...</h1>
@@ -126,7 +145,6 @@ export const Search = () => {
             )}
           </div>
         </div>
-
       </div>
     </div>
   );

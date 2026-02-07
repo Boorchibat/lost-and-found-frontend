@@ -11,16 +11,18 @@ const Home = () => {
   return (
     <div className="w-full bg-gradient-to-r from-yellow-500 to-blue-500">
       <section className="flex flex-col md:flex-row justify-center px-4 md:px-16 py-16">
-        <div className="flex flex-col ml-[150px] w-full md:w-1/2 mb-10 md:mb-0 text-center md:text-left">
-          <h1 className="text-4xl mt-[150px]  sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-6">
-            Find & Recover with Efficiency
-          </h1>
-          <p className="text-base sm:text-lg md:text-xl text-white max-w-lg mx-auto md:mx-0">
-            Experience effortless recovery and relief with Lost and Found
-          </p>
-        </div>
+       <div className="flex flex-col w-full md:w-1/2 px-6 sm:px-10 md:px-0 md:ml-[150px] mb-10 md:mb-0 text-center md:text-left">
+  <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white mt-24 sm:mt-32 md:mt-[150px] mb-6">
+    Find & Recover with Efficiency
+  </h1>
 
-        <div className="flex flex-col w-full md:w-1/2 justify-center items-center gap-5">
+  <p className="text-base sm:text-lg md:text-xl text-white max-w-lg mx-auto md:mx-0">
+    Experience effortless recovery and relief with Lost and Found
+  </p>
+</div>
+
+
+        <div className="flex flex-col w-full md:w-1/2 mt-[100px] justify-center items-center gap-5">
           <a href="/lost">
             <Button className="flex items-center justify-center gap-x-4 px-6 py-4 sm:px-10 sm:py-6 w-40 sm:w-48 bg-gradient-to-r from-red-500 to-red-300 text-lg sm:text-xl hover:bg-white hover:text-gray-800">
               <span>Lost</span>

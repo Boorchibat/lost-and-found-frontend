@@ -17,7 +17,6 @@ export const EditProfile = (userData: EditProfileProps) => {
   const [openDelete, setOpenDelete] = React.useState(false);
   const { token, logout } = useUser();
   const Data = userData.userData;
-
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
   const handleOpenDelete = () => setOpenDelete(true);
@@ -28,12 +27,11 @@ export const EditProfile = (userData: EditProfileProps) => {
       await DeleteUser(Data?._id, token);
       handleCloseDelete();
       logout();
-      
     } catch (err) {
       console.error(err);
     }
   };
-  console.log(userData)
+  const notUser = Data._id !== useUser().user?._id;
   return (
     <div className="w-[90%] lg:w-[50%] mt-[40px] h-[700px] flex flex-col rounded-md border-2 border-black items-center">
       <div className="w-full flex items-center justify-center mt-[50px] relative py-4">
@@ -46,18 +44,20 @@ export const EditProfile = (userData: EditProfileProps) => {
             className="rounded-full object-cover sm:w-24 sm:h-24 w-20 h-20"
           />
         </div>
-        <Button
-          onClick={handleOpenDelete}
-          className="absolute right-4 sm:right-6 bg-transparent hover:bg-transparent flex justify-center items-center"
-        >
-          <Image
-            src="/trash.svg"
-            width={48}
-            height={48}
-            alt="trash"
-            className="w-12 h-12 sm:w-16 sm:h-16"
-          />
-        </Button>
+        {!notUser && (
+          <Button
+            onClick={handleOpenDelete}
+            className="absolute right-4 sm:right-6 bg-transparent hover:bg-transparent flex justify-center items-center"
+          >
+            <Image
+              src="/trash.svg"
+              width={48}
+              height={48}
+              alt="trash"
+              className="w-12 h-12 sm:w-16 sm:h-16"
+            />
+          </Button>
+        )}
       </div>
 
       <div className="flex flex-col md:w-[60%] w-[80%] mt-[30px]">
@@ -84,14 +84,16 @@ export const EditProfile = (userData: EditProfileProps) => {
           {Data ? Data.number : "Loading..."}
         </h1>
       </div>
-      <div className="mt-[30px] w-full flex justify-center">
-        <Button
-          onClick={handleOpen}
-          className="w-[80%] md:w-[60%] h-[50px] bg-white text-black hover:bg-black hover:text-white"
-        >
-          Edit Profile
-        </Button>
-      </div>
+      {!notUser && (
+        <div className="mt-[30px] w-full flex justify-center">
+          <Button
+            onClick={handleOpen}
+            className="w-[80%] md:w-[60%] h-[50px] bg-white text-black hover:bg-black hover:text-white"
+          >
+            Edit Profile
+          </Button>
+        </div>
+      )}
 
       <ModalLayout Data={Data} open={open} handleClose={handleClose} />
       <ModalDelete

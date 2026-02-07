@@ -9,9 +9,11 @@ import { useUser } from "@/app/context/UserContext";
 import { EditProfile } from "@/app/components/profile/EditProfile";
 import { ReportCard } from "@/app/components/report-page/components/card/ReportCard";
 import { Button } from "@/components/ui/button";
+import { useParams } from "next/navigation";
 
 const Page = () => {
-  const { token, user } = useUser();
+  const params = useParams();
+  const userIdParam = params?.id as string;
 
   const [data, setData] = useState<ItemProps[]>([]);
   const [userData, setUserData] = useState<any>(null);
@@ -19,29 +21,32 @@ const Page = () => {
   const [userLoading, setUserLoading] = useState(true);
 
   useEffect(() => {
-    if (!user?._id) return;
+    const fetchItems = async () => {
+      try {
+        setItemsLoading(true);
+        if (!userIdParam) return;
+        const result = await getItemz<ItemProps[]>(userIdParam);
+        setData(result);
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setItemsLoading(false);
+      }
+    };
 
-    setItemsLoading(true);
-    getItemz<ItemProps[]>(user._id)
-      .then(setData)
-      .catch(console.error)
-      .finally(() => setItemsLoading(false));
-  }, [user?._id]);
-
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 6;
-
-  const totalPages = Math.ceil(data.length / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const currentItems = data.slice(startIndex, startIndex + itemsPerPage);
+    fetchItems();
+  }, [userIdParam]);
 
   useEffect(() => {
-    if (!user?._id || !token) return;
-
     const fetchUser = async () => {
+      if (!userIdParam) {
+        setUserData(null);
+        setUserLoading(false);
+        return;
+      }
       try {
         setUserLoading(true);
-        const result = await getSingleUser(user._id);
+        const result = await getSingleUser(userIdParam);
         setUserData(result);
       } catch (error) {
         console.error(error);
@@ -51,7 +56,13 @@ const Page = () => {
     };
 
     fetchUser();
-  }, [user?._id, token]);
+  }, [userIdParam]);
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 6;
+  const totalPages = Math.ceil(data.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const currentItems = data.slice(startIndex, startIndex + itemsPerPage);
 
   return (
     <div className="w-full bg-gradient-to-r from-yellow-500 to-blue-500 flex flex-col items-center">
@@ -84,11 +95,9 @@ const Page = () => {
                 >
                   Previous
                 </Button>
-
                 <span className="font-semibold">
                   Page {currentPage} of {totalPages}
                 </span>
-
                 <Button
                   onClick={() => setCurrentPage((p) => p + 1)}
                   disabled={currentPage === totalPages}

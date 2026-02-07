@@ -1,5 +1,6 @@
 "use client";
 
+import { getSingleUser } from "@/lib/auth/getUser";
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
 
 export interface User {
@@ -28,19 +29,49 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     const storedUser = localStorage.getItem("user");
     const storedToken = localStorage.getItem("token");
 
-    if (storedUser && storedToken) {
-      setUser(JSON.parse(storedUser));
-      setToken(storedToken);
-    }
+    if (storedToken && storedUser) {
+      try {
+        const parsedUser: User = JSON.parse(storedUser);
+        setToken(storedToken);
 
-    setLoading(false);
+        getSingleUser<User>(parsedUser._id)
+          .then((fetchedUser) => {
+            if (fetchedUser) {
+              setUser(fetchedUser);
+              localStorage.setItem("user", JSON.stringify(fetchedUser));
+            } else {
+              setUser(null);
+              setToken(null);
+              localStorage.removeItem("user");
+              localStorage.removeItem("token");
+            }
+          })
+          .catch(() => {
+            setUser(null);
+            setToken(null);
+            localStorage.removeItem("user");
+            localStorage.removeItem("token");
+          })
+          .finally(() => setLoading(false));
+      } catch {
+        setUser(null);
+        setToken(null);
+        localStorage.removeItem("user");
+        localStorage.removeItem("token");
+        setLoading(false);
+      }
+    } else {
+      setUser(null);
+      setToken(null);
+      setLoading(false);
+    }
   }, []);
-  console.log(user)
 
   const logout = () => {
     setUser(null);
     setToken(null);
-    localStorage.clear();
+    localStorage.removeItem("user");
+    localStorage.removeItem("token");
   };
 
   return (

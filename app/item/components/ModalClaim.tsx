@@ -37,13 +37,13 @@ export const ModalClaim = ({
   onSuccess,
 }: ModalClaimProps) => {
   const { token } = useUser();
-  const [submitted, setSubmitted] = useState(false); // new state
+  const [submitted, setSubmitted] = useState(false); 
 
   return (
     <Modal
       open={open}
       onClose={() => {
-        setSubmitted(false); // reset when closing
+        setSubmitted(false); 
         handleClose();
       }}
       aria-labelledby="modal-title"
@@ -112,7 +112,8 @@ export const ModalClaim = ({
 
                   resetForm();
                   onSuccess?.();
-                  setSubmitted(true); // show submitted state
+                  setSubmitted(true);
+                  handleClose();
                 } catch (error: any) {
                   const backendMessage =
                     error?.response?.data?.message ||

@@ -72,7 +72,7 @@ export const ClaimCard = ({ claimId, itemId }: Props) => {
     );
   }
   return (
-    <div className="w-[310px] h-auto bg-white rounded-xl shadow-md border overflow-hidden">
+    <div className="w-[360px] h-auto bg-white rounded-xl shadow-md border overflow-hidden">
       <div className="h-[50px] w-full bg-gray-100 flex items-center gap-4 px-4">
         <Image
           src={userData?.profileImage?.url ?? "/user.svg"}

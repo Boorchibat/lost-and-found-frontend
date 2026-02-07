@@ -1,7 +1,7 @@
 import { getItems} from "../getDataFromBackend";
 
 
-export const PostItem = () => {
+export const getItemzz = () => {
   return getItems("/item");
 };
 

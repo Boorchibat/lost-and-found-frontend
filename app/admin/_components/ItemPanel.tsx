@@ -44,17 +44,22 @@ export const ItemPanel = ({ data, onUpdate }: ItemPanelProps) => {
   };
 
   return (
-    <div className="w-full border-t border-black">
-      <div className="flex items-center">
-        <h1 className="font-bold text-[20px] w-[30%] p-3 border-r border-black">
-          {data.name}
-        </h1>
-        <h1 className="font-bold p-3 border-r w-[30%] border-black text-[20px]">
-          {data.itemname}
-        </h1>
-        <div className="p-3 border-r border-black w-[10%] flex justify-center">
-          <Button onClick={() => setOpen(true)} className="bg-gray-500">
-            View item
+  <div className="border-t border-black">
+      <div className="flex flex-col md:flex-row">
+        <div className="md:w-[30%] p-3 md:border-r border-black">
+          <span className="md:hidden text-sm text-gray-500">Name</span>
+          <h1 className="font-bold text-lg">{data.name}</h1>
+        </div>
+
+        <div className="md:w-[30%] p-3 md:border-r border-black">
+          <span className="md:hidden text-sm text-gray-500">Item name</span>
+          <h1 className="font-bold text-lg">{data.itemname}</h1>
+        </div>
+
+        <div className="md:w-[10%] p-3 md:border-r border-black flex justify-start md:justify-center">
+          <span className="md:hidden text-sm text-gray-500">Preview</span>
+          <Button className="bg-gray-500" onClick={() => setOpen(true)}>
+            View
           </Button>
           <ModalCard
             data={data}
@@ -63,16 +68,22 @@ export const ItemPanel = ({ data, onUpdate }: ItemPanelProps) => {
             handleOpen={() => setOpen(true)}
           />
         </div>
-        <div className="w-[30%] flex justify-evenly items-center relative">
-          <Button onClick={handleApprove} className="bg-green-500 hover:bg-green-700">
+
+        <div className="md:w-[30%] p-3 flex flex-col md:flex-row gap-3 md:justify-evenly items-center relative">
+          <Button
+            onClick={handleApprove}
+            className="bg-green-500 hover:bg-green-700 w-full md:w-auto"
+          >
             Approve
           </Button>
-          <Button onClick={handleReject} className="bg-red-500 hover:bg-red-700">
+          <Button
+            onClick={handleReject}
+            className="bg-red-500 hover:bg-red-700 w-full md:w-auto"
+          >
             Reject
           </Button>
-
           {feedback && (
-            <span className="absolute top-0 right-0 text-2xl">
+            <span className="absolute top-2 right-2 text-2xl">
               {feedback === "accepted" ? "✅" : "❌"}
             </span>
           )}
