@@ -1,31 +1,11 @@
 "use client";
 
-import {
-  Modal,
-  Box,
-  Typography,
-  Button,
-  IconButton,
-  Divider,
-} from "@mui/material";
+import { Modal, Box, Typography, Button, IconButton, Divider } from "@mui/material";
 import Image from "next/image";
 import { ItemProps } from "@/index";
 import { useRouter } from "next/navigation";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useState, useMemo } from "react";
-
-const style = {
-  position: "absolute",
-  top: "50%",
-  left: "50%",
-  transform: "translate(-50%, -50%)",
-  width: "100%",
-  maxWidth: 520,
-  bgcolor: "background.paper",
-  borderRadius: 6,
-  boxShadow: 24,
-  p: 3,
-};
 
 export const MatchModal = ({
   open,
@@ -43,24 +23,18 @@ export const MatchModal = ({
   const [imageIndex, setImageIndex] = useState(0);
 
   const item = items[itemIndex];
-  const images = useMemo(
-    () => [item.mainImage, ...(item.images || [])],
-    [item],
-  );
+  const images = useMemo(() => [item.mainImage, ...(item.images || [])], [item]);
 
   const nextItem = () => {
     setItemIndex((prev) => (prev + 1) % items.length);
     setImageIndex(0);
   };
-
   const prevItem = () => {
     setItemIndex((prev) => (prev - 1 + items.length) % items.length);
     setImageIndex(0);
   };
-
   const nextImage = () => setImageIndex((prev) => (prev + 1) % images.length);
-  const prevImage = () =>
-    setImageIndex((prev) => (prev - 1 + images.length) % images.length);
+  const prevImage = () => setImageIndex((prev) => (prev - 1 + images.length) % images.length);
 
   const handleClaim = () => {
     onClose();
@@ -69,17 +43,37 @@ export const MatchModal = ({
 
   return (
     <Modal open={open} onClose={onClose}>
-      <Box sx={style}>
-        <Typography variant="h5" fontWeight={800} textAlign="center" mb={2}>
+      <Box
+        sx={{
+          position: "absolute",
+          top: "50%",
+          left: "50%",
+          transform: "translate(-50%, -50%)",
+          width: { xs: "90%", sm: 400, md: 520 },
+          maxHeight: { xs: "90vh", sm: "auto" },
+          overflowY: "auto",
+          bgcolor: "background.paper",
+          borderRadius: 3,
+          boxShadow: 24,
+          p: { xs: 2, sm: 3 },
+        }}
+      >
+        <Typography
+          variant="h6"
+          fontWeight={800}
+          textAlign="center"
+          mb={2}
+          fontSize={{ xs: 18, sm: 22, md: 24 }}
+        >
           {items.length === 1 ? "Is this yours?" : "Are any of these yours?"}
         </Typography>
 
         <Box
           sx={{
             width: "100%",
-            height: 240,
+            height: { xs: 180, sm: 220, md: 240 },
             position: "relative",
-            borderRadius: 3,
+            borderRadius: 2,
             overflow: "hidden",
             mb: 2,
           }}
@@ -97,36 +91,42 @@ export const MatchModal = ({
                 sx={{
                   position: "absolute",
                   top: "50%",
-                  left: 10,
+                  left: 8,
                   transform: "translateY(-50%)",
                   bgcolor: "rgba(255,255,255,0.85)",
                   "&:hover": { bgcolor: "white" },
+                  p: { xs: 0.5, sm: 1 },
                 }}
               >
-                <ChevronLeft />
+                <ChevronLeft fontSize="small" />
               </IconButton>
               <IconButton
                 onClick={nextImage}
                 sx={{
                   position: "absolute",
                   top: "50%",
-                  right: 10,
+                  right: 8,
                   transform: "translateY(-50%)",
                   bgcolor: "rgba(255,255,255,0.85)",
                   "&:hover": { bgcolor: "white" },
+                  p: { xs: 0.5, sm: 1 },
                 }}
               >
-                <ChevronRight />
+                <ChevronRight fontSize="small" />
               </IconButton>
             </>
           )}
         </Box>
 
-        <Typography fontWeight={700} textAlign="center" fontSize={18}>
+        <Typography
+          fontWeight={700}
+          textAlign="center"
+          fontSize={{ xs: 16, sm: 18, md: 20 }}
+        >
           {item.itemname}
         </Typography>
         <Typography
-          fontSize={14}
+          fontSize={{ xs: 12, sm: 14 }}
           color="text.secondary"
           textAlign="center"
           mb={1}
@@ -134,14 +134,14 @@ export const MatchModal = ({
           Found at {item.location}
         </Typography>
         <Typography
-          fontSize={14}
+          fontSize={{ xs: 12, sm: 14 }}
           textAlign="center"
           sx={{
             color: "text.primary",
             bgcolor: "#f9fafb",
             borderRadius: 2,
-            px: 2,
-            py: 1.5,
+            px: { xs: 1, sm: 2 },
+            py: { xs: 0.8, sm: 1.5 },
             mb: 2,
           }}
         >
@@ -150,7 +150,7 @@ export const MatchModal = ({
 
         {items.length > 1 && (
           <Typography
-            fontSize={12}
+            fontSize={{ xs: 10, sm: 12 }}
             textAlign="center"
             color="text.secondary"
             mb={2}
@@ -159,13 +159,13 @@ export const MatchModal = ({
           </Typography>
         )}
 
-        <Box display="flex" justifyContent="center" gap={2} mb={2}>
+        <Box display="flex" justifyContent="center" gap={1} mb={2} flexWrap="wrap">
           {items.length > 1 && (
             <>
-              <Button variant="outlined" onClick={prevItem}>
+              <Button size="small" variant="outlined" onClick={prevItem}>
                 Previous Item
               </Button>
-              <Button variant="outlined" onClick={nextItem}>
+              <Button size="small" variant="outlined" onClick={nextItem}>
                 Next Item
               </Button>
             </>
@@ -174,7 +174,7 @@ export const MatchModal = ({
 
         <Divider sx={{ my: 2 }} />
 
-        <Box display="flex" gap={2}>
+        <Box display="flex" gap={1} flexDirection={{ xs: "column", sm: "row" }}>
           <Button
             fullWidth
             sx={{
@@ -182,7 +182,8 @@ export const MatchModal = ({
               "&:hover": { backgroundColor: "#16a34a" },
               color: "white",
               fontWeight: 700,
-              py: 1.2,
+              py: { xs: 1, sm: 1.2 },
+              fontSize: { xs: 14, sm: 16 },
             }}
             onClick={handleClaim}
           >
@@ -195,7 +196,8 @@ export const MatchModal = ({
               borderColor: "#e5e7eb",
               color: "#374151",
               fontWeight: 600,
-              py: 1.2,
+              py: { xs: 1, sm: 1.2 },
+              fontSize: { xs: 14, sm: 16 },
               "&:hover": { bgcolor: "#f3f4f6", borderColor: "#d1d5db" },
             }}
             onClick={onContinue}

@@ -17,6 +17,7 @@ import { ModalUpdateItem } from "../components/UpdateItem";
 import { ModalClaim } from "../components/ModalClaim";
 import { ModalDelete } from "@/app/components/Modal/ModalDelete";
 import { ClaimModal } from "../components/ClaimModal";
+import { ArrowLeft } from "lucide-react";
 
 type PageProps = {
   params: Promise<{ id: string }>;
@@ -96,7 +97,9 @@ export default function ItemDetailPage({ params }: PageProps) {
       router.push("/");
       router.refresh();
     } catch (err: any) {
-      setDeleteError(err?.response?.data?.message || err?.message || "Failed to delete item");
+      setDeleteError(
+        err?.response?.data?.message || err?.message || "Failed to delete item"
+      );
     }
   };
 
@@ -107,17 +110,26 @@ export default function ItemDetailPage({ params }: PageProps) {
 
   return (
     <div className="bg-gradient-to-r from-yellow-500 to-blue-400 min-h-screen py-12 px-4 sm:px-6 lg:px-10">
+      <div className="mb-6">
+        <button
+          onClick={() => router.back()}
+          className="flex items-center justify-center p-2 rounded-full bg-white text-black hover:bg-black hover:text-white transition-colors duration-200"
+        >
+          <ArrowLeft className="w-5 h-5 sm:w-6 sm:h-6" />
+        </button>
+      </div>
+
       <div className="max-w-7xl mx-auto flex flex-col lg:flex-row gap-8">
         <div className="flex-1 flex flex-col gap-6">
           <div
-            className="relative w-full h-100 rounded-xl overflow-hidden bg-gray-100 cursor-pointer"
+            className="relative w-full h-100 rounded-xl overflow-hidden cursor-pointer"
             onClick={() => setIsCarouselOpen(true)}
           >
             <Image
               src={images[imageIndex]?.url || "/file.svg"}
               alt={item.itemname}
               fill
-              className="object-contain"
+              className="object-cover"
             />
           </div>
 
@@ -131,7 +143,9 @@ export default function ItemDetailPage({ params }: PageProps) {
         </div>
 
         <div className="flex-1 bg-white rounded-2xl shadow-lg p-8 space-y-6">
-          <h1 className="text-4xl font-extrabold text-gray-900">{item.itemname}</h1>
+          <h1 className="text-4xl font-extrabold text-gray-900">
+            {item.itemname}
+          </h1>
 
           <p className="text-gray-700 text-lg">
             {truncatedDescription}
@@ -170,16 +184,25 @@ export default function ItemDetailPage({ params }: PageProps) {
 
           <div className="flex flex-wrap gap-4 mt-6">
             {user && !isOwner && (
-              <Button onClick={() => setOpenClaim(true)} className="bg-blue-600 hover:bg-blue-700 text-white">
+              <Button
+                onClick={() => setOpenClaim(true)}
+                className="bg-blue-600 hover:bg-blue-700 text-white"
+              >
                 Make Claim
               </Button>
             )}
             {user && isOwner && (
               <>
-                <Button onClick={() => setOpenUpdate(true)} className="bg-yellow-500 hover:bg-yellow-600 text-white">
+                <Button
+                  onClick={() => setOpenUpdate(true)}
+                  className="bg-yellow-500 hover:bg-yellow-600 text-white"
+                >
                   Update Item
                 </Button>
-                <Button onClick={() => setOpenDelete(true)} className="bg-red-500 hover:bg-red-600 text-white">
+                <Button
+                  onClick={() => setOpenDelete(true)}
+                  className="bg-red-500 hover:bg-red-600 text-white"
+                >
                   Delete
                 </Button>
               </>

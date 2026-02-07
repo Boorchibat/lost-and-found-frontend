@@ -13,6 +13,7 @@ export const ReportCard = (props: ItemProps) => {
   const [userData, setUserData] = useState<any>(null);
   const [userLoading, setUserLoading] = useState(true);
   const [openContact, setOpenContact] = useState(false);
+  const [showMore, setShowMore] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -22,6 +23,7 @@ export const ReportCard = (props: ItemProps) => {
     }
 
     let userId: string | undefined;
+
     if (typeof props.User === "string") {
       userId = props.User;
     } else if (props.User._id) {
@@ -38,7 +40,7 @@ export const ReportCard = (props: ItemProps) => {
         const result = await getSingleUser(userId);
         setUserData(result);
       } catch (error) {
-        console.error("Failed to fetch user:", error);
+        console.error(error);
       } finally {
         setUserLoading(false);
       }
@@ -72,6 +74,18 @@ export const ReportCard = (props: ItemProps) => {
     );
   }
 
+  const isFound = props.isFound === "Found";
+
+  const descriptionWords = props.description
+    ? props.description.split(" ")
+    : [];
+  const truncatedDescription =
+    descriptionWords.length > 50
+      ? descriptionWords.slice(0, 50).join(" ") + "..."
+      : props.description || "No description available.";
+
+  const showSeeMore = descriptionWords.length > 50;
+
   return (
     <div
       onClick={handleCardClick}
@@ -83,11 +97,11 @@ export const ReportCard = (props: ItemProps) => {
             src={userData?.profileImage?.url || "/user.svg"}
             alt={userData?.username || "User"}
             width={50}
-            height={70}
+            height={50}
             className="rounded-full bg-gray-200"
           />
         </div>
-        <div className="ml-3 flex flex-col">
+        <div className="ml-3 flex flex-col overflow-hidden">
           <h1 className="font-semibold text-gray-800 truncate">
             {props.itemname || "Unnamed Item"}
           </h1>
@@ -99,40 +113,49 @@ export const ReportCard = (props: ItemProps) => {
         </div>
       </div>
 
-      <div className="h-[35%] w-full p-2 flex justify-center items-center">
-        {props.mainImage?.url ? (
-          <Image
-            src={props.mainImage.url}
-            alt={props.itemname || "Item image"}
-            width={200}
-            height={200}
-            className="object-cover w-full h-full rounded-lg shadow-sm"
-          />
-        ) : (
-          <div className="w-[180px] h-[120px] bg-gray-200 flex items-center justify-center rounded-lg">
-            No Image
+      <div className="h-[48%] w-full p-2">
+        <div className="relative w-full h-full rounded-xl overflow-hidden bg-gray-100">
+          {props.mainImage?.url ? (
+            <Image
+              src={props.mainImage.url}
+              alt={props.itemname || "Item image"}
+              fill
+              className="object-cover"
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center text-gray-400">
+              No Image
+            </div>
+          )}
+
+          <div
+            className={`absolute top-2 right-2 px-3 py-1 text-xs font-semibold text-white rounded-full ${
+              isFound ? "bg-green-500" : "bg-red-500"
+            }`}
+          >
+            {isFound ? "Found" : "Lost"}
           </div>
-        )}
+        </div>
       </div>
 
-      <div className="h-[47%] w-full px-4 pb-4 flex flex-col justify-between">
-        <div className="flex-1 mt-2">
+      <div className="h-[34%] w-full px-4 pb-4 flex flex-col">
+        <div className="flex-1 overflow-hidden">
           <h1 className="font-semibold text-gray-700">Description:</h1>
-          <p
-            className="text-sm text-gray-600 line-clamp-3 truncate
-          "
-          >
-            {props.description || "No description available."}
-          </p>
-        </div>
-        <div>
-          <h1 className="font-semibold text-gray-700">Location:</h1>
-          <p className="text-sm text-gray-500 truncate">
-            {props.location || "Unknown location"}
-          </p>
+          <p className="text-sm text-gray-600">{showMore ? props.description : truncatedDescription}</p>
+          {showSeeMore && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowMore(!showMore);
+              }}
+              className="text-xs text-blue-500 mt-1 hover:underline"
+            >
+              {showMore ? "See less" : "See more"}
+            </button>
+          )}
         </div>
 
-        <div className="flex justify-end mt-3">
+        <div className="flex justify-end mt-2">
           <Button
             onClick={handleContactClick}
             className="rounded-lg bg-gradient-to-r from-blue-400 to-green-400 text-white hover:scale-105 transition-transform duration-300"
@@ -140,6 +163,7 @@ export const ReportCard = (props: ItemProps) => {
             Contact
           </Button>
         </div>
+
         <ContactModal
           data={props}
           handleClose={() => setOpenContact(false)}

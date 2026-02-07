@@ -49,9 +49,9 @@ export const Header = () => {
     { label: "Home", href: "/" },
     { label: "Lost", href: "/lost" },
     { label: "Found", href: "/found" },
-     { label: "Report Found", href: "/report-lost" },
-      { label: "Report Lost", href: "/report-found" },
-    ...(user ? [{ label: "Search", href: "/search" }] : []),
+    { label: "Report Lost", href: "/report-lost" },
+    { label: "Report Found", href: "/report-found" },
+    { label: "Search", href: "/search" },
   ];
 
   return (
@@ -64,7 +64,10 @@ export const Header = () => {
         <nav className="hidden md:flex items-center gap-4">
           {navLinks.map((link) => (
             <Link key={link.href} href={link.href}>
-              <Button variant="ghost" className="text-sm hover:bg-white hover:text-black px-3 py-1">
+              <Button
+                variant="ghost"
+                className="text-sm hover:bg-white hover:text-black px-3 py-1"
+              >
                 {link.label}
               </Button>
             </Link>
@@ -94,7 +97,10 @@ export const Header = () => {
               </DropdownMenuTrigger>
               <DropdownMenuContent side="bottom" className="w-40">
                 <DropdownMenuItem>
-                  <Link href={`/account-info/${user._id}`} className="block w-full">
+                  <Link
+                    href={`/account-info/${user._id}`}
+                    className="block w-full"
+                  >
                     Profile
                   </Link>
                 </DropdownMenuItem>
@@ -140,13 +146,19 @@ export const Header = () => {
               {user && (
                 <>
                   <DropdownMenuItem>
-                    <Link href={`/account-info/${user._id}`} className="block w-full">
+                    <Link
+                      href={`/account-info/${user._id}`}
+                      className="block w-full"
+                    >
                       Profile
                     </Link>
                   </DropdownMenuItem>
                   {isAdmin && (
                     <DropdownMenuItem>
-                      <Link href={`/admin/${user._id}`} className="block w-full">
+                      <Link
+                        href={`/admin/${user._id}`}
+                        className="block w-full"
+                      >
                         Admin
                       </Link>
                     </DropdownMenuItem>
