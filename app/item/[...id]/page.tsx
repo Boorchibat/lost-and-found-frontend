@@ -80,7 +80,7 @@ export default function ItemDetailPage({ params }: PageProps) {
   const totalPages = Math.ceil(totalClaims / CLAIMS_PER_PAGE);
   const paginatedClaims = item.claims?.slice(
     currentPage * CLAIMS_PER_PAGE,
-    currentPage * CLAIMS_PER_PAGE + CLAIMS_PER_PAGE
+    currentPage * CLAIMS_PER_PAGE + CLAIMS_PER_PAGE,
   );
 
   const handleOpenClaimDetails = (claimId: string) => {
@@ -98,7 +98,7 @@ export default function ItemDetailPage({ params }: PageProps) {
       router.refresh();
     } catch (err: any) {
       setDeleteError(
-        err?.response?.data?.message || err?.message || "Failed to delete item"
+        err?.response?.data?.message || err?.message || "Failed to delete item",
       );
     }
   };
@@ -162,20 +162,34 @@ export default function ItemDetailPage({ params }: PageProps) {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 text-gray-800">
             <div>
               <h3 className="font-semibold">📧 Email</h3>
-              <p>{item.contactEmail}</p>
+              <a
+                href={`mailto:${item.contactEmail}`}
+                className="underline text-blue-600 hover:text-blue-800 transition-colors"
+              >
+                {item.contactEmail}
+              </a>
             </div>
+
             <div>
               <h3 className="font-semibold">📞 Phone</h3>
-              <p>{item.contactNumber}</p>
+              <a
+                href={`tel:${item.contactNumber}`}
+                className="underline text-blue-600 hover:text-blue-800 transition-colors"
+              >
+                {item.contactNumber}
+              </a>
             </div>
+
             <div>
               <h3 className="font-semibold">📅 Date Reported</h3>
               <p>{dateOnly}</p>
             </div>
+
             <div>
               <h3 className="font-semibold">🔎 Status</h3>
               <p>{item.isFound}</p>
             </div>
+
             <div>
               <h3 className="font-semibold">📍 Location</h3>
               <p>{item.location}</p>

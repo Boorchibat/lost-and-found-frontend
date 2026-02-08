@@ -7,6 +7,7 @@ export const Site = () => {
       <a className="underline" href="/found"><p>Found</p></a>
       <a className="underline" href="/report-found"><p>Report Found</p></a>
       <a className="underline" href="/search"><p>Search</p></a>
+      <a className="underline" href="/additional-information"><p>More information</p></a>
     </div>
   );
 };

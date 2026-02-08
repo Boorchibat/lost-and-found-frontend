@@ -20,23 +20,23 @@ const Home = () => {
           </p>
         </div>
 
-        <div className="flex flex-col w-full md:w-1/2 justify-center items-center gap-4 sm:gap-6">
+        <div className="flex flex-col w-full md:w-1/2 mt-0 md:mt-[140px] justify-center items-center gap-4 sm:gap-6">
           <a href="/lost">
-            <Button className="flex items-center justify-center gap-x-3 sm:gap-x-4 px-8 sm:px-10 py-4 sm:py-6 w-[280px] sm:w-48 text-xl xs:text-2xl bg-gradient-to-r from-red-500 to-red-300 hover:scale-105 transition-transform hover:bg-white hover:text-gray-800">
+            <Button className="flex items-center justify-center gap-x-3 md:h-[60px] md:text-[30px] sm:gap-x-4 px-8 sm:px-10 py-4 w-[220px] h-[50px] text-[30px] sm:py-6 md:w-[300px] sm:w-48  xs:text-2xl bg-gradient-to-r from-red-500 to-red-300 hover:scale-105 transition-transform hover:bg-white hover:text-gray-800">
               <span>Lost</span>
               <Image width={40} height={40} src="/lost.svg" alt="Lost" />
             </Button>
           </a>
 
           <a href="/found">
-            <Button className="flex items-center justify-center gap-x-3 sm:gap-x-4 px-8 sm:px-10 py-4 sm:py-6 w-[280px] sm:w-48 text-xl xs:text-2xl bg-gradient-to-r from-green-500 to-green-300 hover:scale-105 transition-transform hover:bg-white hover:text-gray-800">
+            <Button className="flex items-center justify-center gap-x-3 md:h-[60px] w-[220px] h-[50px] text-[30px] md:text-[30px] sm:gap-x-4 px-8 sm:px-10 py-4 sm:py-6 md:w-[300px] sm:w-48 xs:text-2xl bg-gradient-to-r from-green-500 to-green-300 hover:scale-105 transition-transform hover:bg-white hover:text-gray-800">
               <span>Found</span>
               <Image width={40} height={40} src="/found.svg" alt="Found" />
             </Button>
           </a>
 
           <a href="/search">
-            <Button className="flex items-center justify-center gap-x-3 sm:gap-x-4 px-8 sm:px-10 py-4 sm:py-6 w-[280px] sm:w-48 text-xl xs:text-2xl bg-gradient-to-r from-gray-500 to-gray-300 hover:scale-105 transition-transform hover:bg-white hover:text-gray-800">
+            <Button className="flex items-center justify-center gap-x-3 md:h-[60px] w-[220px] h-[50px] text-[30px] md:text-[30px] sm:gap-x-4 px-8 sm:px-10 py-4 sm:py-6 md:w-[300px] sm:w-48 xs:text-2xl bg-gradient-to-r from-gray-500 to-gray-300 hover:scale-105 transition-transform hover:bg-white hover:text-gray-800">
               <span>Search</span>
               <Image width={40} height={40} src="/search.svg" alt="Search" />
             </Button>
@@ -54,16 +54,15 @@ const Home = () => {
         <PostedNumber />
       </motion.section>
 
-<motion.section
-  initial={{ opacity: 0, y: 40 }}
-  whileInView={{ opacity: 1, y: 0 }}
-  transition={{ duration: 0.6, ease: "easeOut" }}
-  viewport={{ once: true, amount: 0.05 }} 
-  className="w-full px-4 md:px-16 py-8 md:py-12 flex justify-center overflow-visible"
->
-  <HomeCards />
-</motion.section>
-
+      <motion.section
+        initial={{ opacity: 0, y: 40 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, ease: "easeOut" }}
+        viewport={{ once: true, amount: 0.05 }}
+        className="w-full px-4 md:px-16 py-8 md:py-12 flex justify-center overflow-visible"
+      >
+        <HomeCards />
+      </motion.section>
 
       <motion.section
         initial={{ opacity: 0, y: 40 }}

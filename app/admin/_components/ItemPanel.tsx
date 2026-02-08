@@ -10,12 +10,14 @@ import { rejectItem } from "@/lib/item/AdminReject";
 
 type ItemPanelProps = {
   data: ItemProps;
-  onUpdate: (id: string) => void; 
+  onUpdate: (id: string) => void;
 };
 
 export const ItemPanel = ({ data, onUpdate }: ItemPanelProps) => {
   const [open, setOpen] = useState(false);
-  const [feedback, setFeedback] = useState<null | "accepted" | "rejected">(null);
+  const [feedback, setFeedback] = useState<null | "accepted" | "rejected">(
+    null,
+  );
   const { token } = useUser();
   const itemId = data._id;
 
@@ -37,14 +39,14 @@ export const ItemPanel = ({ data, onUpdate }: ItemPanelProps) => {
       await rejectItem(itemId, token);
       setFeedback("rejected");
       setTimeout(() => setFeedback(null), 5000);
-      onUpdate(itemId); 
+      onUpdate(itemId);
     } catch (err) {
       console.error(err);
     }
   };
 
   return (
-  <div className="border-t border-black">
+    <div className="border-t border-black">
       <div className="flex flex-col md:flex-row">
         <div className="md:w-[30%] p-3 md:border-r border-black">
           <span className="md:hidden text-sm text-gray-500">Name</span>
@@ -57,10 +59,15 @@ export const ItemPanel = ({ data, onUpdate }: ItemPanelProps) => {
         </div>
 
         <div className="md:w-[10%] p-3 md:border-r border-black flex justify-start md:justify-center">
-          <span className="md:hidden text-sm text-gray-500">Preview</span>
-          <Button className="bg-gray-500" onClick={() => setOpen(true)}>
-            View
-          </Button>
+          <div className="flex items-center">
+            <span className="md:hidden text-sm text-gray-500 lg:mr-0 mr-[30px]">
+              Preview
+            </span>
+            <Button className="bg-gray-500" onClick={() => setOpen(true)}>
+              View
+            </Button>
+          </div>
+
           <ModalCard
             data={data}
             open={open}

@@ -118,7 +118,7 @@ export const Search = () => {
 
         <div className="flex-1 flex flex-col items-center gap-8">
           <div className="lg:mr-[250px] w-full flex flex-col justify-center items-center">
-            <h1 className="mb-6 font-bold lg:text-[70px] text-4xl text-gray-900">
+            <h1 className="mb-9 font-bold lg:text-[70px] text-4xl text-gray-900">
               Search for an Item
             </h1>
             <Searchbar setQuery={setSearchTerm} />

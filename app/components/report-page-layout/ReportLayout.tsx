@@ -19,7 +19,12 @@ export const ReportLayout = ({ title, isFound }: ReportLayoutProps) => {
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       const isMobile = window.innerWidth < 1024;
-      if (isMobile && aiRef.current && !aiRef.current.contains(event.target as Node)) setShowAI(false);
+      if (
+        isMobile &&
+        aiRef.current &&
+        !aiRef.current.contains(event.target as Node)
+      )
+        setShowAI(false);
     };
 
     if (showAI) document.addEventListener("mousedown", handleClickOutside);
@@ -56,7 +61,7 @@ export const ReportLayout = ({ title, isFound }: ReportLayoutProps) => {
               </AnimatePresence>
 
               <Button
-                onClick={() => setShowAI(prev => !prev)}
+                onClick={() => setShowAI((prev) => !prev)}
                 className="absolute lg:bottom-8 lg:right-80 right-5 bottom-7 w-[50px] h-[50px] rounded-full hover:bg-gradient-to-r from-green-400 to-blue-500 text-white font-bold hover:scale-105 transition-transform duration-300 z-30"
               >
                 AI
@@ -65,13 +70,48 @@ export const ReportLayout = ({ title, isFound }: ReportLayoutProps) => {
           </div>
         </div>
       ) : (
-        <div className="w-full h-screen flex flex-col items-center justify-center bg-gradient-to-r from-yellow-500 to-blue-400 gap-5">
-          <h1 className="text-[80px] font-bold text-red-500 mb-[20px]">Sorry</h1>
-          <div className="flex w-[50%] justify-center items-center gap-x-10">
-            <h1 className="font-bold text-[20px]">Users must log in or Sign up before creating a claim</h1>
-            <a href="/login">
-              <Button className="bg-red-400 hover:bg-green-400 p-3">Log in here</Button>
-            </a>
+        <div className="w-full min-h-screen flex items-center justify-center bg-gradient-to-r from-yellow-500 to-blue-400 px-4">
+          <div className="bg-white rounded-2xl shadow-xl p-6 sm:p-8 md:p-10 w-full max-w-md md:max-w-lg text-center space-y-6">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-800">
+              You’re almost there!
+            </h1>
+
+            <p className="text-sm sm:text-base md:text-lg text-gray-600">
+              You need to be logged in to create a claim. Please log in or sign
+              up to continue.
+            </p>
+
+            <div className="flex flex-col sm:flex-row justify-center gap-4">
+              <a href="/login" className="w-full sm:w-auto">
+                <Button
+                  className="
+          w-full 
+          bg-blue-500 hover:bg-blue-600 
+          px-6 py-3 
+          text-white rounded-lg
+          transform transition-transform duration-200 ease-out
+          hover:scale-110
+        "
+                >
+                  Log In
+                </Button>
+              </a>
+
+              <a href="/signup" className="w-full sm:w-auto">
+                <Button
+                  className="
+          w-full 
+          bg-yellow-400 hover:bg-yellow-500 
+          px-6 py-3 
+          text-white rounded-lg
+          transform transition-transform duration-200 ease-out
+          hover:scale-110
+        "
+                >
+                  Sign Up
+                </Button>
+              </a>
+            </div>
           </div>
         </div>
       )}

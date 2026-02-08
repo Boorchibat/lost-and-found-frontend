@@ -6,6 +6,9 @@ import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
 import { getSingleUser } from "@/lib/auth/getUser";
 import CircularProgress from "@mui/material/CircularProgress";
+import { ItemProps } from "@/index";
+import { getItems } from "@/lib/getDataFromBackend";
+import { TwoDivs } from "../_components/TwoDivs";
 
 type PageProps = {
   params: {
@@ -62,6 +65,8 @@ const Page = ({ params }: PageProps) => {
       <h1 className="font-bold text-2xl sm:text-3xl md:text-4xl mt-6">
         Admin Panel
       </h1>
+      <TwoDivs />
+
       <div className="w-full flex justify-center mt-6 mb-10">
         <div className="w-full max-w-7xl">
           <AdminPanel />
