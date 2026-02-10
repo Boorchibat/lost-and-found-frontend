@@ -103,7 +103,7 @@ export const ReportCard = (props: ItemProps) => {
             alt={userData?.username || "User"}
             width={50}
             height={50}
-            className="rounded-full bg-gray-200"
+            className="rounded-full bg-gray-200 w-[50px] h-[50px] object-cover"
           />
         </div>
         <div className="ml-3 flex flex-col overflow-hidden">

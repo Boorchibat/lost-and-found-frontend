@@ -99,10 +99,10 @@ export const ClaimCard = ({ claimId, itemId }: Props) => {
         <h2 className="text-[15px] font-bold mt-[20px]">Contact Information:</h2>
         <div>
           <div className="flex gap-x-10">
-           <p className="font-bold">Email:</p> <p>{claimData.Number}</p>
+           <p className="font-bold">Email:</p> <p>{claimData.Email}</p>
           </div>
           <div className="flex gap-x-5">
-           <p className="font-bold">Number:</p> <p>{claimData.Email}</p>
+           <p className="font-bold">Number:</p> <p>{claimData.Number}</p>
           </div>
         </div>
       </div>

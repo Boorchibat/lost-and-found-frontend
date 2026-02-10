@@ -136,33 +136,35 @@ export const ClaimModal = ({
           )}
 
           <div className="space-y-3">
-            <p>
-              <span className="font-semibold">Name:</span> {claimData.Name}
-            </p>
-            <p>
-              <span className="font-semibold">Email:</span>
+            <div className="flex gap-2">
+              <span className="font-semibold min-w-[80px]">Name:</span>
+              <span>{claimData.Name}</span>
+            </div>
+
+            <div className="flex gap-2">
+              <span className="font-semibold min-w-[80px]">Email:</span>
               <a
                 href={`mailto:${claimData.Email}`}
                 className="text-blue-600 hover:underline"
               >
                 {claimData.Email}
               </a>
-            </p>
+            </div>
 
-            <p>
-              <span className="font-semibold">Phone:</span>
+            <div className="flex gap-2">
+              <span className="font-semibold min-w-[80px]">Phone:</span>
               <a
                 href={`tel:${claimData.Number}`}
                 className="text-blue-600 hover:underline"
               >
                 {claimData.Number}
               </a>
-            </p>
+            </div>
 
-            <p className="whitespace-pre-wrap">
-              <span className="font-semibold">Message:</span>{" "}
-              {claimData.claimText}
-            </p>
+            <div className="flex gap-2">
+              <span className="font-semibold min-w-[80px]">Message:</span>
+              <span className="whitespace-pre-wrap">{claimData.Claim}</span>
+            </div>
           </div>
         </Box>
       </Modal>

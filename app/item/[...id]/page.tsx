@@ -226,7 +226,7 @@ export default function ItemDetailPage({ params }: PageProps) {
       </div>
 
       {item.claims && isOwner && item.claims.length > 0 && (
-        <div className="rounded-2xl bg-gray-500 shadow-lg p-6 space-y-4 mt-8">
+        <div className="rounded-2xl  shadow-lg p-6 space-y-4 mt-8">
           <h2 className="text-2xl bg-white p-6 rounded-md font-bold">Claims</h2>
           <div className="flex flex-wrap gap-6 mt-4 justify-evenly">
             {paginatedClaims?.map((claimId) => (
