@@ -4,19 +4,19 @@ import { Button } from "@/components/ui/button";
 import { ItemProps } from "@/index";
 import { getSingleUser } from "@/lib/auth/getUser";
 import Image from "next/image";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { CircularProgress } from "@mui/material";
 import { ContactModal } from "../ContactModal";
+import { useUser } from "@/app/context/UserContext";
 
 export const ReportCard = (props: ItemProps) => {
   const [userData, setUserData] = useState<any>(null);
   const [userLoading, setUserLoading] = useState(true);
   const [openContact, setOpenContact] = useState(false);
   const [showMore, setShowMore] = useState(false);
-
+  const { user } = useUser();
   const router = useRouter();
-
   const hasClaims = props.claims && props.claims.length > 0;
 
   useEffect(() => {
@@ -25,16 +25,13 @@ export const ReportCard = (props: ItemProps) => {
       return;
     }
 
-    let userId: string | undefined;
-
-    if (typeof props.User === "string") {
-      userId = props.User;
-    } else if (props.User._id) {
+    if (typeof props.User === "object" && props.User._id) {
       setUserData(props.User);
       setUserLoading(false);
       return;
     }
 
+    const userId = typeof props.User === "string" ? props.User : undefined;
     if (!userId) return;
 
     const fetchUser = async () => {
@@ -42,8 +39,8 @@ export const ReportCard = (props: ItemProps) => {
         setUserLoading(true);
         const result = await getSingleUser(userId);
         setUserData(result);
-      } catch (error) {
-        console.error(error);
+      } catch (err) {
+        console.error(err);
       } finally {
         setUserLoading(false);
       }
@@ -59,9 +56,7 @@ export const ReportCard = (props: ItemProps) => {
 
   const handleUserClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (userData?._id) {
-      router.push(`/account-info/${userData._id}`);
-    }
+    if (userData?._id) router.push(`/account-info/${userData._id}`);
   };
 
   const handleContactClick = (e: React.MouseEvent) => {
@@ -78,19 +73,15 @@ export const ReportCard = (props: ItemProps) => {
   }
 
   const isFound = props.isFound === "Found";
-  const isOwner = props.User?._id === userData?._id;
+  const isOwner = props.User?._id === user?._id;
 
-  const descriptionWords = props.description
-    ? props.description.split(" ")
-    : [];
-
+  const descriptionWords = props.description?.split(" ") || [];
   const truncatedDescription =
     descriptionWords.length > 50
       ? descriptionWords.slice(0, 50).join(" ") + "..."
       : props.description || "No description available.";
-
   const showSeeMore = descriptionWords.length > 50;
-
+console.log(isOwner)
   return (
     <div
       onClick={handleCardClick}
@@ -135,7 +126,9 @@ export const ReportCard = (props: ItemProps) => {
 
           {hasClaims && isOwner && (
             <div className="absolute top-2 left-2 z-10">
-              <Button className="ronded-full bg-red-500 text-white"><p>Has claims</p></Button>
+              <Button className="rounded-full bg-red-500 text-white px-2 py-1 text-xs">
+                Has claims
+              </Button>
             </div>
           )}
 
