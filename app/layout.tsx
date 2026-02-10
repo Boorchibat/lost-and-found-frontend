@@ -17,7 +17,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Lost and Found",
+  title: "FoundR",
   description: "Lost and Found website for school communites",
 };
 
