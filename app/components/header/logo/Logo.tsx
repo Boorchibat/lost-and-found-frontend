@@ -5,7 +5,7 @@ export const Logo = () => {
     <div className="flex items-center gap-2 sm:gap-3 justify-center  sm:justify-start">
       <div className="w-12 sm:w-16 max-w-[64px] flex justify-center items-center">
         <Image
-          src="/lost.svg"
+          src="/FoundRreal.png"
           alt="Lost and Found logo"
           width={64}
           height={64}
@@ -15,7 +15,7 @@ export const Logo = () => {
       </div>
 
       <h1 className="hidden sm:block text-sm sm:text-3xl font-bold text-black whitespace-nowrap">
-        Lost and Found
+        FoundR
       </h1>
     </div>
   );

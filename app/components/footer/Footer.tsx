@@ -12,7 +12,7 @@ export const Footer = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-wrap justify-between items-start gap-6">
         <div className="w-full md:w-[15%] flex justify-center md:justify-start items-center mb-4 md:mb-0">
           <Image
-            src="/lost.svg"
+            src="/found.svg"
             alt="Lost and Found logo"
             width={100}
             height={100}
