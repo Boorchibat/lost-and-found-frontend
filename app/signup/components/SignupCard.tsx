@@ -24,7 +24,9 @@ const SignupSchema = Yup.object({
     .matches(/^\d{10}$/, "Phone number must be 10 digits")
     .required("Phone number is required"),
   username: Yup.string().required("Username is required"),
-  password: Yup.string().min(6, "Min 6 characters").required("Password is required"),
+  password: Yup.string()
+    .min(6, "Min 6 characters")
+    .required("Password is required"),
 });
 
 export const SignupCard = () => {
@@ -42,7 +44,10 @@ export const SignupCard = () => {
         profileImage: "/user.svg",
       }}
       validationSchema={SignupSchema}
-      onSubmit={async (values: SignUpPayload, { setSubmitting, setFieldError }) => {
+      onSubmit={async (
+        values: SignUpPayload,
+        { setSubmitting, setFieldError },
+      ) => {
         try {
           const data = await signUp(values);
           setUser(data.user);
@@ -60,75 +65,95 @@ export const SignupCard = () => {
       }}
     >
       {({ values, errors, touched, handleChange, isSubmitting }) => (
-        <Form className="w-full max-w-md sm:max-w-sm bg-yellow-100 rounded-xl p-6 sm:p-4 shadow-md mx-2">
-          <h1 className="text-2xl sm:text-xl font-bold text-center mb-5">Create Account</h1>
+        <Form className="w-full max-w-lg bg-yellow-100 rounded-2xl p-8 shadow-lg mx-auto">
+          <h1 className="text-3xl font-bold text-center mb-6">
+            Create Account
+          </h1>
 
-          <div className="mb-4">
-            <label className="block text-sm font-medium mb-1">Full Name</label>
-            <Input name="name" value={values.name} onChange={handleChange} placeholder="Name" />
+          <div className="mb-5">
+            <label className="block text-base font-medium mb-2">
+              Full Name
+            </label>
+            <Input
+              name="name"
+              value={values.name}
+              onChange={handleChange}
+              placeholder="John Doe"
+              className="h-11"
+            />
             {touched.name && errors.name && (
-              <p className="text-red-500 text-xs mt-1">{errors.name}</p>
+              <p className="text-red-500 text-sm mt-1">{errors.name}</p>
             )}
           </div>
 
-          <div className="mb-4">
-            <label className="block text-sm font-medium mb-1">Email</label>
+          <div className="mb-5">
+            <label className="block text-base font-medium mb-2">Email</label>
             <Input
               name="email"
               value={values.email}
               onChange={handleChange}
               placeholder="example@gmail.com"
+              className="h-11"
             />
             {touched.email && errors.email && (
-              <p className="text-red-500 text-xs mt-1">{errors.email}</p>
+              <p className="text-red-500 text-sm mt-1">{errors.email}</p>
             )}
           </div>
 
-          <div className="mb-4">
-            <label className="block text-sm font-medium mb-1">Phone Number</label>
+          <div className="mb-5">
+            <label className="block text-base font-medium mb-2">
+              Phone Number
+            </label>
             <Input
               name="number"
               value={values.number}
               onChange={handleChange}
-              placeholder="111-111-1111"
+              placeholder="1111111111"
+              className="h-11"
             />
             {touched.number && errors.number && (
-              <p className="text-red-500 text-xs mt-1">{errors.number}</p>
+              <p className="text-red-500 text-sm mt-1">{errors.number}</p>
             )}
           </div>
 
-          <div className="mb-4">
-            <label className="block text-sm font-medium mb-1">Username</label>
+          <div className="mb-5">
+            <label className="block text-base font-medium mb-2">Username</label>
             <Input
               name="username"
               value={values.username}
               onChange={handleChange}
-              placeholder="Username"
+              placeholder="username"
+              className="h-11"
             />
             {touched.username && errors.username && (
-              <p className="text-red-500 text-xs mt-1">{errors.username}</p>
+              <p className="text-red-500 text-sm mt-1">{errors.username}</p>
             )}
           </div>
 
-          <div className="mb-6">
-            <label className="block text-sm font-medium mb-1">Password</label>
+          <div className="mb-7">
+            <label className="block text-base font-medium mb-2">Password</label>
             <Input
               type="password"
               name="password"
               value={values.password}
               onChange={handleChange}
               placeholder="••••••••"
+              className="h-11"
             />
             {touched.password && errors.password && (
-              <p className="text-red-500 text-xs mt-1">{errors.password}</p>
+              <p className="text-red-500 text-sm mt-1">{errors.password}</p>
             )}
           </div>
 
-          <Button type="submit" className="w-full py-2 sm:py-1" disabled={isSubmitting}>
+          <Button
+            type="submit"
+            className="w-full h-11 text-base"
+            disabled={isSubmitting}
+          >
             {isSubmitting ? "Creating account..." : "Sign Up"}
           </Button>
 
-          <p className="text-center mt-4 text-sm sm:text-xs">
+          <p className="text-center mt-5 text-base">
             Already have an account?{" "}
             <a href="/login" className="underline font-medium">
               Sign in

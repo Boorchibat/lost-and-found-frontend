@@ -6,9 +6,9 @@ import { SignupCard } from "./components/SignupCard";
 const Signup = () => {
   return (
     <div className="w-full min-h-screen bg-gradient-to-r from-yellow-500 to-blue-500 p-6 flex flex-col md:flex-row justify-center items-center gap-8">
-      <div className="flex justify-center items-center w-full md:w-auto">
-        <SignupCard />
-      </div>
+    <div className="w-full md:w-1/2">
+          <SignupCard />
+        </div>
 
       <div className="hidden md:block">
         <Image
