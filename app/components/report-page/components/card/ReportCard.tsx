@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { ItemProps } from "@/index";
 import { getSingleUser } from "@/lib/auth/getUser";
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { CircularProgress } from "@mui/material";
 import { ContactModal } from "../ContactModal";
@@ -14,7 +14,10 @@ export const ReportCard = (props: ItemProps) => {
   const [userLoading, setUserLoading] = useState(true);
   const [openContact, setOpenContact] = useState(false);
   const [showMore, setShowMore] = useState(false);
+
   const router = useRouter();
+
+  const hasClaims = props.claims && props.claims.length > 0;
 
   useEffect(() => {
     if (!props.User) {
@@ -75,10 +78,12 @@ export const ReportCard = (props: ItemProps) => {
   }
 
   const isFound = props.isFound === "Found";
+  const isOwner = props.User?._id === userData?._id;
 
   const descriptionWords = props.description
     ? props.description.split(" ")
     : [];
+
   const truncatedDescription =
     descriptionWords.length > 50
       ? descriptionWords.slice(0, 50).join(" ") + "..."
@@ -89,7 +94,7 @@ export const ReportCard = (props: ItemProps) => {
   return (
     <div
       onClick={handleCardClick}
-      className="cursor-pointer transform hover:scale-105 transition-transform duration-300 w-[300px] h-[380px] mt-6 bg-white rounded-2xl border border-gray-200 shadow-lg flex flex-col overflow-hidden"
+      className="relative cursor-pointer transform hover:scale-105 transition-transform duration-300 w-[300px] h-[380px] mt-6 bg-white rounded-2xl border border-gray-200 shadow-lg flex flex-col overflow-hidden"
     >
       <div className="h-[18%] w-full bg-gray-50 flex items-center px-4 py-3 border-b border-gray-100">
         <div onClick={handleUserClick} className="cursor-pointer">
@@ -128,6 +133,12 @@ export const ReportCard = (props: ItemProps) => {
             </div>
           )}
 
+          {hasClaims && isOwner && (
+            <div className="absolute top-2 left-2 z-10">
+              <Button className="ronded-full bg-red-500 text-white"><p>Has claims</p></Button>
+            </div>
+          )}
+
           <div
             className={`absolute top-2 right-2 px-3 py-1 text-xs font-semibold text-white rounded-full ${
               isFound ? "bg-green-500" : "bg-red-500"
@@ -141,7 +152,9 @@ export const ReportCard = (props: ItemProps) => {
       <div className="h-[34%] w-full px-4 pb-4 flex flex-col">
         <div className="flex-1 overflow-hidden">
           <h1 className="font-semibold text-gray-700">Description:</h1>
-          <p className="text-sm text-gray-600">{showMore ? props.description : truncatedDescription}</p>
+          <p className="text-sm text-gray-600">
+            {showMore ? props.description : truncatedDescription}
+          </p>
           {showSeeMore && (
             <button
               onClick={(e) => {
