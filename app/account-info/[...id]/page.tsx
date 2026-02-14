@@ -8,7 +8,7 @@ import CircularProgress from "@mui/material/CircularProgress";
 import { EditProfile } from "@/app/components/profile/EditProfile";
 import { ReportCard } from "@/app/components/report-page/components/card/ReportCard";
 import { Button } from "@/components/ui/button";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 
 const Page = () => {
   const params = useParams();
@@ -58,6 +58,16 @@ const Page = () => {
 
     fetchUser();
   }, [userIdParam]);
+ const router = useRouter();
+
+useEffect(() => {
+  if (!userLoading && userData?.message === "User not found") {
+    router.push("/"); 
+  }
+}, [userLoading, userData, router]);
+
+
+  console.log(userData);
 
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 6;
