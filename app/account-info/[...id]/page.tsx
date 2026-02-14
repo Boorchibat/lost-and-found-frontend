@@ -5,7 +5,6 @@ import { getItemz } from "@/lib/item/getItem";
 import { ItemProps } from "@/index";
 import { getSingleUser } from "@/lib/auth/getUser";
 import CircularProgress from "@mui/material/CircularProgress";
-import { useUser } from "@/app/context/UserContext";
 import { EditProfile } from "@/app/components/profile/EditProfile";
 import { ReportCard } from "@/app/components/report-page/components/card/ReportCard";
 import { Button } from "@/components/ui/button";
@@ -25,10 +24,12 @@ const Page = () => {
       try {
         setItemsLoading(true);
         if (!userIdParam) return;
+
         const result = await getItemz<ItemProps[]>(userIdParam);
-        setData(result);
+        setData(Array.isArray(result) ? result : []);
       } catch (error) {
         console.error(error);
+        setData([]);
       } finally {
         setItemsLoading(false);
       }
@@ -81,7 +82,7 @@ const Page = () => {
           </div>
         ) : currentItems.length > 0 ? (
           <>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 justify-items-center">
               {currentItems.map((item) => (
                 <ReportCard key={item._id} {...item} />
               ))}
