@@ -124,7 +124,7 @@ console.log(isOwner)
             </div>
           )}
 
-          {hasClaims && isOwner && (
+          {hasClaims && isOwner && user &&  (
             <div className="absolute top-2 left-2 z-10">
               <Button className="rounded-full bg-red-500 text-white px-2 py-1 text-xs">
                 Has claims
