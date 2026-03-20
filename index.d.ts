@@ -1,4 +1,3 @@
-
 export type Image = {
   url: string;
   public_id: string;
@@ -26,6 +25,7 @@ export type User = {
   createdAt: string;
   _id: string;
 };
+
 export type UserProp = {
   username: string;
   password?: string;
@@ -35,6 +35,7 @@ export type UserProp = {
   number: string;
   email: string;
 };
+
 export type ItemProps = {
   _id: string;
   itemname: string;
@@ -51,9 +52,11 @@ export type ItemProps = {
   physical: string[];
   claims: string[];
   status: string;
+  embedding?: number[]; 
   createdAt: Date;
   updatedAt: Date;
 };
+
 export type ItemPropsSafe = {
   _id: string;
   itemname: string;
@@ -68,10 +71,10 @@ export type ItemPropsSafe = {
   name: string;
   claims: string[];
   status: string;
+  embedding?: number[];
   createdAt: Date;
   updatedAt: Date;
 };
-
 
 export type SearchBarProps = {
   setQuery: (value: string) => void;
@@ -112,6 +115,7 @@ export type SignInResponse = {
     isVerified: boolean;
   };
 };
+
 export type UpdateItemPayload = Partial<{
   itemname: string;
   location: string;
@@ -128,9 +132,9 @@ export type UpdateItemPayload = Partial<{
   }[];
   isFound: boolean;
 }>;
-type GetClaimProp = {
-  claimId: string,
-  token: string,
-  itemId: string
-}
 
+export type GetClaimProp = {
+  claimId: string;
+  token: string;
+  itemId: string;
+};

@@ -38,6 +38,16 @@ export const postItems = async <T, D>(
   return data;
 };
 
+export const postSearch = async <T, D>(
+  endpoint: string,
+  payload: D,
+): Promise<T> => {
+
+
+  const { data } = await axiosInstance.post<T>(endpoint, payload);
+  return data;
+};
+
 export const update = async <T, D>(
   endpoint: string,
   payload: D,
