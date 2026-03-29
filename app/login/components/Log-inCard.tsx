@@ -1,7 +1,7 @@
 "use client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { getAuth, SignInPayload } from "@/lib/auth/getAuth";
+import { SignInPayload } from "@/lib/auth/getAuth";
 import { Formik, Form } from "formik";
 import * as Yup from "yup";
 import { useRouter } from "next/navigation";
@@ -23,7 +23,7 @@ export const LoginCard = () => {
       validationSchema={LoginSchema}
       onSubmit={async (
         values: SignInPayload,
-        { setSubmitting, setFieldError }
+        { setSubmitting, setFieldError },
       ) => {
         try {
           const data = await signIn(values);
@@ -79,10 +79,14 @@ export const LoginCard = () => {
               {isSubmitting ? "Signing in..." : "Sign in"}
             </Button>
           </div>
-
-          <a href="/signup">
-            <h1 className="mt-[30px] underline">Dont have an account yet?</h1>
-          </a>
+          <div className="w-full flex items-center justify-center gap-x-5">
+            <a href="/signup">
+              <h1 className="mt-[30px] underline">Dont have an account yet?</h1>
+            </a>
+             <a href="/signin">
+              <h1 className="mt-[30px] underline">Log in with email</h1>
+            </a>
+          </div>
         </Form>
       )}
     </Formik>

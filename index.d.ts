@@ -24,6 +24,9 @@ export type User = {
   number: string;
   createdAt: string;
   _id: string;
+  verificationCodeExpires: string;
+  isVerified: boolean;
+  verfiedAt: Date | null;
 };
 
 export type UserProp = {
@@ -52,7 +55,7 @@ export type ItemProps = {
   physical: string[];
   claims: string[];
   status: string;
-  embedding?: number[]; 
+  embedding?: number[];
   createdAt: Date;
   updatedAt: Date;
 };
@@ -61,7 +64,7 @@ export type ItemPropsSafe = {
   _id: string;
   itemname: string;
   isFound: string;
-  User: string | User; 
+  User: string | User;
   mainImage: Image;
   images: Image[];
   description: string;
