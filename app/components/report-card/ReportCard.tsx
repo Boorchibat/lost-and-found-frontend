@@ -13,6 +13,10 @@ import { ArrowLeft, ArrowRight, XCircle } from "lucide-react";
 import { getItems } from "@/lib/getDataFromBackend";
 import { ItemProps } from "@/index";
 import { MatchModal } from "./components/MatchModal";
+import {
+  DescriptionPayload,
+  GenerateDescription,
+} from "@/lib/item/generateDescription";
 
 const colors = [
   "Red",
@@ -47,7 +51,9 @@ const ReportSchema = Yup.object().shape({
   contactNumber: Yup.string()
     .matches(/^\d{10}$/, "Phone number must be 10 digits")
     .required("Contact number is required"),
-  contactEmail: Yup.string().email("Invalid email").required("Email is required"),
+  contactEmail: Yup.string()
+    .email("Invalid email")
+    .required("Email is required"),
 });
 
 export const ReportCard = ({
@@ -59,11 +65,8 @@ export const ReportCard = ({
 }) => {
   const { user, token } = useUser();
   const [images, setImages] = useState<File[]>([]);
-  type UploadedImage = {
-  secure_url: string;
-  public_id: string;
-};
-const [uploadedImages, setUploadedImages] = useState<UploadedImage[]>([]);
+  type UploadedImage = { secure_url: string; public_id: string };
+  const [uploadedImages, setUploadedImages] = useState<UploadedImage[]>([]);
   const [uploadMessage, setUploadMessage] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [carouselIndex, setCarouselIndex] = useState(0);
@@ -71,7 +74,10 @@ const [uploadedImages, setUploadedImages] = useState<UploadedImage[]>([]);
   const [Data, setData] = useState<ItemProps[]>([]);
   const [matchedItems, setMatchedItems] = useState<ItemProps[]>([]);
   const [showMatchModal, setShowMatchModal] = useState(false);
-  const [pendingSubmit, setPendingSubmit] = useState<null | (() => Promise<void>)>(null);
+  const [pendingSubmit, setPendingSubmit] = useState<
+    null | (() => Promise<void>)
+  >(null);
+  const [generatingDesc, setGeneratingDesc] = useState(false);
 
   useEffect(() => {
     getItems<ItemProps[]>("/item").then(setData).catch(console.error);
@@ -80,11 +86,16 @@ const [uploadedImages, setUploadedImages] = useState<UploadedImage[]>([]);
   const foundData = Data.filter((item) => item.isFound === "Found");
 
   if (!user || !token)
-    return <div className="h-screen flex items-center justify-center">No user found</div>;
+    return (
+      <div className="h-screen flex items-center justify-center">
+        No user found
+      </div>
+    );
 
   const findMatchingItems = (itemname: string) =>
     foundData.filter(
-      (item) => item.itemname.trim().toLowerCase() === itemname.trim().toLowerCase()
+      (item) =>
+        item.itemname.trim().toLowerCase() === itemname.trim().toLowerCase(),
     );
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -99,7 +110,8 @@ const [uploadedImages, setUploadedImages] = useState<UploadedImage[]>([]);
       const combined = [...prev, ...files];
       const unique = combined.filter(
         (file, index, self) =>
-          index === self.findIndex((f) => f.name === file.name && f.size === file.size)
+          index ===
+          self.findIndex((f) => f.name === file.name && f.size === file.size),
       );
       return unique;
     });
@@ -115,7 +127,9 @@ const [uploadedImages, setUploadedImages] = useState<UploadedImage[]>([]);
   const nextImage = () =>
     setCarouselIndex((prev) => (prev + 1) % uploadedImages.length);
   const prevImage = () =>
-    setCarouselIndex((prev) => (prev - 1 + uploadedImages.length) % uploadedImages.length);
+    setCarouselIndex(
+      (prev) => (prev - 1 + uploadedImages.length) % uploadedImages.length,
+    );
 
   const fields: { label: string; name: keyof typeof initialValues }[] = [
     { label: "Name", name: "name" },
@@ -144,7 +158,9 @@ const [uploadedImages, setUploadedImages] = useState<UploadedImage[]>([]);
         validationSchema={ReportSchema}
         onSubmit={async (values, { setSubmitting, resetForm }) => {
           const shouldCheckMatches = title === "Report a lost Item";
-          const matches = shouldCheckMatches ? findMatchingItems(values.itemname) : [];
+          const matches = shouldCheckMatches
+            ? findMatchingItems(values.itemname)
+            : [];
 
           const submitLogic = async () => {
             if (!images.length) {
@@ -153,7 +169,9 @@ const [uploadedImages, setUploadedImages] = useState<UploadedImage[]>([]);
             }
             try {
               setUploading(true);
-              const uploaded = await Promise.all(images.map((img) => uploadToCloudinary(img)));
+              const uploaded = await Promise.all(
+                images.map((img) => uploadToCloudinary(img)),
+              );
               setUploadedImages(uploaded);
               const payload = {
                 name: values.name,
@@ -168,7 +186,10 @@ const [uploadedImages, setUploadedImages] = useState<UploadedImage[]>([]);
                   url: uploaded[0].secure_url,
                   public_id: uploaded[0].public_id,
                 },
-                images: uploaded.map((img) => ({ url: img.secure_url, public_id: img.public_id })),
+                images: uploaded.map((img) => ({
+                  url: img.secure_url,
+                  public_id: img.public_id,
+                })),
                 color: values.color,
                 physical: values.physical,
               };
@@ -194,149 +215,231 @@ const [uploadedImages, setUploadedImages] = useState<UploadedImage[]>([]);
           await submitLogic();
         }}
       >
-        {({ isSubmitting, handleChange, values, errors, touched, setFieldValue }) => (
-          <Form className="w-[95%] lg:w-[60%] flex flex-col items-center gap-6 bg-gradient-to-r from-yellow-200 via-yellow-100 to-yellow-200 rounded-3xl p-8 mt-6 shadow-xl border border-yellow-300 animate-fadeIn">
-            <h1 className="text-4xl sm:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-green-500 mb-6 text-center">
-              {title}
-            </h1>
+        {({
+          isSubmitting,
+          handleChange,
+          values,
+          errors,
+          touched,
+          setFieldValue,
+        }) => {
+          const handleGenerateDescription = async () => {
+            if (!values.itemname || images.length === 0) {
+              alert(
+                "Please enter an item name and upload at least one image to generate a description.",
+              );
+              return;
+            }
+            try {
+              setGeneratingDesc(true);
+              let uploaded: UploadedImage[] = [];
+              if (uploadedImages.length === 0) {
+                uploaded = await Promise.all(
+                  images.map((img) => uploadToCloudinary(img)),
+                );
+                setUploadedImages(uploaded);
+              } else {
+                uploaded = uploadedImages;
+              }
+              const payload: DescriptionPayload = {
+                itemname: values.itemname,
+                Images: uploaded.map((img) => ({
+                  url: img.secure_url,
+                  public_id: img.public_id,
+                })),
+              };
+              const generatedDescription = await GenerateDescription(
+                payload,
+                token,
+              );
+              setFieldValue("description", generatedDescription);
+            } finally {
+              setGeneratingDesc(false);
+            }
+          };
 
-            {fields.map((field) => (
-              <div key={field.name} className="w-full flex flex-col sm:flex-row items-center gap-4">
-                <h1 className="font-semibold text-lg w-32">{field.label}:</h1>
-                <Input
-                  type="text"
-                  name={field.name}
-                  value={values[field.name]}
-                  onChange={handleChange}
-                  className="w-full sm:w-2/3 border-2 border-gray-300 focus:border-blue-400 focus:ring focus:ring-blue-200 rounded-md shadow-sm transition-all duration-300"
-                />
-                {touched[field.name] && errors[field.name] && (
-                  <p className="text-red-600 text-sm ml-1 mt-1">
-                    <ErrorMessage name={field.name} />
-                  </p>
-                )}
-              </div>
-            ))}
-
-            <div className="w-full flex flex-col sm:flex-row items-start gap-4">
-              <h1 className="font-semibold text-lg w-32">Color:</h1>
-              <div className="flex flex-wrap w-full sm:w-2/3 gap-2">
-                {colors.map((color) => (
-                  <Button
-                    type="button"
-                    key={color}
-                    variant={values.color.includes(color) ? "default" : "outline"}
-                    onClick={() =>
-                      values.color.includes(color)
-                        ? setFieldValue("color", values.color.filter((c) => c !== color))
-                        : setFieldValue("color", [...values.color, color])
-                    }
+          return (
+            <Form className="w-[95%] lg:w-[60%] flex flex-col items-center gap-6 bg-gradient-to-r from-yellow-200 via-yellow-100 to-yellow-200 rounded-3xl p-8 mt-6 shadow-xl border border-yellow-300 animate-fadeIn">
+              <h1 className="text-4xl sm:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-green-500 mb-6 text-center">
+                {title}
+              </h1>
+              <div className="w-full flex flex-col sm:flex-row items-start gap-4">
+                <h1 className="font-semibold text-lg w-32">Upload Photos:</h1>
+                <div className="flex flex-col w-full sm:w-2/3">
+                  <input
+                    id="upload"
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    onChange={(e) => handleFileUpload(e)}
+                    className="hidden"
+                  />
+                  <label
+                    htmlFor="upload"
+                    className="flex items-center justify-center gap-2 border border-gray-400 rounded-lg p-2 cursor-pointer bg-white hover:bg-gradient-to-r hover:from-green-400 hover:to-blue-400 transition-all duration-300 shadow-md"
                   >
-                    {color}
-                  </Button>
-                ))}
-              </div>
-            </div>
+                    <Image
+                      src="/upload.svg"
+                      alt="Upload"
+                      width={30}
+                      height={30}
+                    />{" "}
+                    Upload Images
+                  </label>
 
-            <div className="w-full flex flex-col sm:flex-row items-start gap-4">
-              <h1 className="font-semibold text-lg w-32">Physical Type:</h1>
-              <div className="flex flex-wrap w-full sm:w-2/3 gap-2">
-                {physicalTypes.map((type) => (
-                  <Button
-                    type="button"
-                    key={type}
-                    variant={values.physical.includes(type) ? "default" : "outline"}
-                    onClick={() =>
-                      values.physical.includes(type)
-                        ? setFieldValue("physical", values.physical.filter((p) => p !== type))
-                        : setFieldValue("physical", [...values.physical, type])
-                    }
-                  >
-                    {type}
-                  </Button>
-                ))}
-              </div>
-            </div>
+                  {uploadMessage && (
+                    <p
+                      className={`mt-2 font-semibold ${
+                        uploadMessage.includes("❌")
+                          ? "text-red-600"
+                          : "text-green-600"
+                      }`}
+                    >
+                      {uploadMessage}
+                    </p>
+                  )}
 
-            <div className="w-full flex flex-col sm:flex-row items-start gap-4">
-              <h1 className="font-semibold text-lg w-32">Upload Photos:</h1>
-              <div className="flex flex-col w-full sm:w-2/3">
-                <input
-                  id="upload"
-                  type="file"
-                  accept="image/*"
-                  multiple
-                  onChange={handleFileUpload}
-                  className="hidden"
-                />
-                <label
-                  htmlFor="upload"
-                  className="flex items-center justify-center gap-2 border border-gray-400 rounded-lg p-2 cursor-pointer bg-white hover:bg-gradient-to-r hover:from-green-400 hover:to-blue-400 transition-all duration-300 shadow-md"
-                >
-                  <Image src="/upload.svg" alt="Upload" width={30} height={30} /> Upload Images
-                </label>
+                  {uploading && (
+                    <div className="w-full bg-gray-200 rounded-full h-1.5 mt-2 overflow-hidden">
+                      <div className="bg-blue-500 h-full animate-progress-loading w-full origin-left"></div>
+                    </div>
+                  )}
 
-                {uploadMessage && (
-                  <p
-                    className={`mt-2 font-semibold ${
-                      uploadMessage.includes("❌") ? "text-red-600" : "text-green-600"
-                    }`}
-                  >
-                    {uploadMessage}
-                  </p>
-                )}
-
-                {uploading && (
-                  <div className="w-full bg-gray-200 rounded-full h-1.5 mt-2 overflow-hidden">
-                    <div className="bg-blue-500 h-full animate-progress-loading w-full origin-left"></div>
-                  </div>
-                )}
-
-                {images.length > 0 && (
-                  <div className="flex flex-wrap gap-3 mt-4">
-                    {images.map((file, index) => (
-                      <div
-                        key={index}
-                        className="w-24 h-24 relative rounded-lg overflow-hidden shadow-md border group"
-                      >
-                        <Image
-                          src={URL.createObjectURL(file)}
-                          alt={`preview-${index}`}
-                          fill
-                          className="object-cover"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => removeImage(index)}
-                          className="absolute top-1 right-1 p-0.5 bg-white/90 rounded-full text-red-600 hover:text-red-800 transition z-10"
+                  {images.length > 0 && (
+                    <div className="flex flex-wrap gap-3 mt-4">
+                      {images.map((file, index) => (
+                        <div
+                          key={index}
+                          className="w-24 h-24 relative rounded-lg overflow-hidden shadow-md border group"
                         >
-                          <XCircle size={18} />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                )}
+                          <Image
+                            src={URL.createObjectURL(file)}
+                            alt={`preview-${index}`}
+                            fill
+                            className="object-cover"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => removeImage(index)}
+                            className="absolute top-1 right-1 p-0.5 bg-white/90 rounded-full text-red-600 hover:text-red-800 transition z-10"
+                          >
+                            <XCircle size={18} />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
 
-            <div className="flex flex-col sm:flex-row gap-6 mt-4">
-              <Button
-                type="submit"
-                className="w-44 h-12 bg-gradient-to-r from-green-400 to-blue-500 text-white font-bold hover:scale-105 transition-transform duration-300"
-                disabled={isSubmitting}
-              >
-                {isSubmitting ? "Reporting..." : "Submit"}
-              </Button>
-              <Button
-                type="button"
-                className="w-44 h-12 bg-white text-black border border-gray-400 hover:bg-red-400 hover:text-white transition-all duration-300"
-                onClick={() => window.location.reload()}
-              >
-                Reset
-              </Button>
-            </div>
-          </Form>
-        )}
+              {fields.map((field) => (
+                <div
+                  key={field.name}
+                  className="w-full flex flex-col sm:flex-row items-center gap-4"
+                >
+                  <h1 className="font-semibold text-lg w-32">{field.label}:</h1>
+                  <div className="flex flex-col w-full sm:w-2/3 gap-2">
+                    <Input
+                      type="text"
+                      name={field.name}
+                      value={values[field.name]}
+                      onChange={handleChange}
+                      className="w-full border-2 border-gray-300 focus:border-blue-400 focus:ring focus:ring-blue-200 rounded-md shadow-sm transition-all duration-300"
+                    />
+                    {field.name === "description" && values.itemname && images.length > 0 &&  (
+                      <Button
+                        type="button"
+                        onClick={handleGenerateDescription}
+                        disabled={generatingDesc}
+                        className="mt-1 w-48 bg-gradient-to-r from-purple-400 to-pink-500 text-black"
+                      >
+                        {generatingDesc
+                          ? "Generating..."
+                          : "Generate Description"}
+                          <Image src={"/AI.svg"} alt="AI" width={20} height={20}/>
+                      </Button>
+                    )}
+                  </div>
+                  {touched[field.name] && errors[field.name] && (
+                    <p className="text-red-600 text-sm ml-1 mt-1">
+                      <ErrorMessage name={field.name} />
+                    </p>
+                  )}
+                </div>
+              ))}
+
+              <div className="w-full flex flex-col sm:flex-row items-start gap-4">
+                <h1 className="font-semibold text-lg w-32">Color:</h1>
+                <div className="flex flex-wrap w-full sm:w-2/3 gap-2">
+                  {colors.map((color) => (
+                    <Button
+                      type="button"
+                      key={color}
+                      variant={
+                        values.color.includes(color) ? "default" : "outline"
+                      }
+                      onClick={() =>
+                        values.color.includes(color)
+                          ? setFieldValue(
+                              "color",
+                              values.color.filter((c) => c !== color),
+                            )
+                          : setFieldValue("color", [...values.color, color])
+                      }
+                    >
+                      {color}
+                    </Button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="w-full flex flex-col sm:flex-row items-start gap-4">
+                <h1 className="font-semibold text-lg w-32">Physical Type:</h1>
+                <div className="flex flex-wrap w-full sm:w-2/3 gap-2">
+                  {physicalTypes.map((type) => (
+                    <Button
+                      type="button"
+                      key={type}
+                      variant={
+                        values.physical.includes(type) ? "default" : "outline"
+                      }
+                      onClick={() =>
+                        values.physical.includes(type)
+                          ? setFieldValue(
+                              "physical",
+                              values.physical.filter((p) => p !== type),
+                            )
+                          : setFieldValue("physical", [
+                              ...values.physical,
+                              type,
+                            ])
+                      }
+                    >
+                      {type}
+                    </Button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="flex flex-col sm:flex-row gap-6 mt-4">
+                <Button
+                  type="submit"
+                  className="w-44 h-12 bg-gradient-to-r from-green-400 to-blue-500 text-white font-bold hover:scale-105 transition-transform duration-300"
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? "Reporting..." : "Submit"}
+                </Button>
+                <Button
+                  type="button"
+                  className="w-44 h-12 bg-white text-black border border-gray-400 hover:bg-red-400 hover:text-white transition-all duration-300"
+                  onClick={() => window.location.reload()}
+                >
+                  Reset
+                </Button>
+              </div>
+            </Form>
+          );
+        }}
       </Formik>
 
       <style jsx global>{`
@@ -365,7 +468,9 @@ const [uploadedImages, setUploadedImages] = useState<UploadedImage[]>([]);
             >
               <XCircle size={28} />
             </button>
-            <h2 className="text-3xl font-bold text-center text-green-600 mb-6">Submitted!</h2>
+            <h2 className="text-3xl font-bold text-center text-green-600 mb-6">
+              Submitted!
+            </h2>
             <p className="font-bold mb-[20px] flex justify-center items-center">
               Thank you for helping out our community!
             </p>

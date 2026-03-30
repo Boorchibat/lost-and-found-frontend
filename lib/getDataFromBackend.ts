@@ -1,8 +1,9 @@
 import { axiosInstance } from "../lib/axios-instance";
 
-export const getData = async <T>(
+export const getData = async <T, D = Record<string, unknown>>(
   endpoint: string,
-  payload?: any
+
+  payload?: D
 ): Promise<T> => {
   const res = await fetch(endpoint, {
     method: "GET",

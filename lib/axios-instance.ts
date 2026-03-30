@@ -14,7 +14,7 @@ axiosInstance.interceptors.request.use(
       const token = localStorage.getItem("token");
 
       if (token) {
-        const decoded: any = jwtDecode(token);
+        const decoded: { exp: number } = jwtDecode(token);
         if (decoded.exp * 1000 < Date.now()) {
           localStorage.removeItem("token");
           window.location.href = "/login";
