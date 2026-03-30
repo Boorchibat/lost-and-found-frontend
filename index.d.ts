@@ -5,11 +5,11 @@ export type Image = {
 
 export type ClaimType = {
   id: string;
-  name: string;
-  claim: string;
-  email: string;
-  number: string;
-  user?: string;
+  Name: string;
+  Claim: string;
+  Email: string;
+  Number: string;
+  User?: string;
   createdAt: string;
   updatedAt: string;
 };

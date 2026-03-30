@@ -44,7 +44,6 @@ export const ItemPanel = ({ data, onUpdate }: ItemPanelProps) => {
       console.error(err);
     }
   };
-
   return (
     <div className="border-t border-black">
       <div className="flex flex-col md:flex-row">

@@ -27,6 +27,7 @@ const colors = [
   "Gray",
   "other",
 ];
+
 const physicalTypes = [
   "Backpack",
   "Clothes",
@@ -46,9 +47,7 @@ const ReportSchema = Yup.object().shape({
   contactNumber: Yup.string()
     .matches(/^\d{10}$/, "Phone number must be 10 digits")
     .required("Contact number is required"),
-  contactEmail: Yup.string()
-    .email("Invalid email")
-    .required("Email is required"),
+  contactEmail: Yup.string().email("Invalid email").required("Email is required"),
 });
 
 export const ReportCard = ({
@@ -60,7 +59,11 @@ export const ReportCard = ({
 }) => {
   const { user, token } = useUser();
   const [images, setImages] = useState<File[]>([]);
-  const [uploadedImages, setUploadedImages] = useState<any[]>([]);
+  type UploadedImage = {
+  secure_url: string;
+  public_id: string;
+};
+const [uploadedImages, setUploadedImages] = useState<UploadedImage[]>([]);
   const [uploadMessage, setUploadMessage] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [carouselIndex, setCarouselIndex] = useState(0);
@@ -68,9 +71,7 @@ export const ReportCard = ({
   const [Data, setData] = useState<ItemProps[]>([]);
   const [matchedItems, setMatchedItems] = useState<ItemProps[]>([]);
   const [showMatchModal, setShowMatchModal] = useState(false);
-  const [pendingSubmit, setPendingSubmit] = useState<
-    null | (() => Promise<void>)
-  >(null);
+  const [pendingSubmit, setPendingSubmit] = useState<null | (() => Promise<void>)>(null);
 
   useEffect(() => {
     getItems<ItemProps[]>("/item").then(setData).catch(console.error);
@@ -79,18 +80,12 @@ export const ReportCard = ({
   const foundData = Data.filter((item) => item.isFound === "Found");
 
   if (!user || !token)
-    return (
-      <div className="h-screen flex items-center justify-center">
-        No user found
-      </div>
-    );
+    return <div className="h-screen flex items-center justify-center">No user found</div>;
 
-  const findMatchingItems = (itemname: string) => {
-    return foundData.filter(
-      (item) =>
-        item.itemname.trim().toLowerCase() === itemname.trim().toLowerCase(),
+  const findMatchingItems = (itemname: string) =>
+    foundData.filter(
+      (item) => item.itemname.trim().toLowerCase() === itemname.trim().toLowerCase()
     );
-  };
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
@@ -104,8 +99,7 @@ export const ReportCard = ({
       const combined = [...prev, ...files];
       const unique = combined.filter(
         (file, index, self) =>
-          index ===
-          self.findIndex((f) => f.name === file.name && f.size === file.size),
+          index === self.findIndex((f) => f.name === file.name && f.size === file.size)
       );
       return unique;
     });
@@ -117,32 +111,40 @@ export const ReportCard = ({
     setImages((prev) => prev.filter((_, i) => i !== index));
     if (images.length <= 1) setUploadMessage("");
   };
+
   const nextImage = () =>
     setCarouselIndex((prev) => (prev + 1) % uploadedImages.length);
   const prevImage = () =>
-    setCarouselIndex(
-      (prev) => (prev - 1 + uploadedImages.length) % uploadedImages.length,
-    );
+    setCarouselIndex((prev) => (prev - 1 + uploadedImages.length) % uploadedImages.length);
+
+  const fields: { label: string; name: keyof typeof initialValues }[] = [
+    { label: "Name", name: "name" },
+    { label: "Item", name: "itemname" },
+    { label: "Location", name: "location" },
+    { label: "Description", name: "description" },
+    { label: "Phone", name: "contactNumber" },
+    { label: "Email", name: "contactEmail" },
+  ];
+
+  const initialValues = {
+    name: "",
+    itemname: "",
+    location: "",
+    description: "",
+    contactNumber: "",
+    contactEmail: "",
+    color: [] as string[],
+    physical: [] as string[],
+  };
 
   return (
     <>
       <Formik
-        initialValues={{
-          name: "",
-          itemname: "",
-          location: "",
-          description: "",
-          contactNumber: "",
-          contactEmail: "",
-          color: [] as string[],
-          physical: [] as string[],
-        }}
+        initialValues={initialValues}
         validationSchema={ReportSchema}
         onSubmit={async (values, { setSubmitting, resetForm }) => {
           const shouldCheckMatches = title === "Report a lost Item";
-          const matches = shouldCheckMatches
-            ? findMatchingItems(values.itemname)
-            : [];
+          const matches = shouldCheckMatches ? findMatchingItems(values.itemname) : [];
 
           const submitLogic = async () => {
             if (!images.length) {
@@ -151,9 +153,7 @@ export const ReportCard = ({
             }
             try {
               setUploading(true);
-              const uploaded = await Promise.all(
-                images.map((img) => uploadToCloudinary(img)),
-              );
+              const uploaded = await Promise.all(images.map((img) => uploadToCloudinary(img)));
               setUploadedImages(uploaded);
               const payload = {
                 name: values.name,
@@ -168,10 +168,7 @@ export const ReportCard = ({
                   url: uploaded[0].secure_url,
                   public_id: uploaded[0].public_id,
                 },
-                images: uploaded.map((img) => ({
-                  url: img.secure_url,
-                  public_id: img.public_id,
-                })),
+                images: uploaded.map((img) => ({ url: img.secure_url, public_id: img.public_id })),
                 color: values.color,
                 physical: values.physical,
               };
@@ -197,45 +194,27 @@ export const ReportCard = ({
           await submitLogic();
         }}
       >
-        {({
-          isSubmitting,
-          handleChange,
-          values,
-          errors,
-          touched,
-          setFieldValue,
-        }) => (
+        {({ isSubmitting, handleChange, values, errors, touched, setFieldValue }) => (
           <Form className="w-[95%] lg:w-[60%] flex flex-col items-center gap-6 bg-gradient-to-r from-yellow-200 via-yellow-100 to-yellow-200 rounded-3xl p-8 mt-6 shadow-xl border border-yellow-300 animate-fadeIn">
             <h1 className="text-4xl sm:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-green-500 mb-6 text-center">
               {title}
             </h1>
 
-            {[
-              { label: "Name", name: "name" },
-              { label: "Item", name: "itemname" },
-              { label: "Location", name: "location" },
-              { label: "Description", name: "description" },
-              { label: "Phone", name: "contactNumber" },
-              { label: "Email", name: "contactEmail" },
-            ].map((field) => (
-              <div
-                key={field.name}
-                className="w-full flex flex-col sm:flex-row items-center gap-4"
-              >
+            {fields.map((field) => (
+              <div key={field.name} className="w-full flex flex-col sm:flex-row items-center gap-4">
                 <h1 className="font-semibold text-lg w-32">{field.label}:</h1>
                 <Input
                   type="text"
                   name={field.name}
-                  value={(values as any)[field.name]}
+                  value={values[field.name]}
                   onChange={handleChange}
                   className="w-full sm:w-2/3 border-2 border-gray-300 focus:border-blue-400 focus:ring focus:ring-blue-200 rounded-md shadow-sm transition-all duration-300"
                 />
-                {touched[field.name as keyof typeof touched] &&
-                  errors[field.name as keyof typeof errors] && (
-                    <p className="text-red-600 text-sm ml-1 mt-1">
-                      <ErrorMessage name={field.name} />
-                    </p>
-                  )}
+                {touched[field.name] && errors[field.name] && (
+                  <p className="text-red-600 text-sm ml-1 mt-1">
+                    <ErrorMessage name={field.name} />
+                  </p>
+                )}
               </div>
             ))}
 
@@ -246,17 +225,12 @@ export const ReportCard = ({
                   <Button
                     type="button"
                     key={color}
-                    variant={
-                      values.color.includes(color) ? "default" : "outline"
+                    variant={values.color.includes(color) ? "default" : "outline"}
+                    onClick={() =>
+                      values.color.includes(color)
+                        ? setFieldValue("color", values.color.filter((c) => c !== color))
+                        : setFieldValue("color", [...values.color, color])
                     }
-                    onClick={() => {
-                      if (values.color.includes(color))
-                        setFieldValue(
-                          "color",
-                          values.color.filter((c) => c !== color),
-                        );
-                      else setFieldValue("color", [...values.color, color]);
-                    }}
                   >
                     {color}
                   </Button>
@@ -271,18 +245,12 @@ export const ReportCard = ({
                   <Button
                     type="button"
                     key={type}
-                    variant={
-                      values.physical.includes(type) ? "default" : "outline"
+                    variant={values.physical.includes(type) ? "default" : "outline"}
+                    onClick={() =>
+                      values.physical.includes(type)
+                        ? setFieldValue("physical", values.physical.filter((p) => p !== type))
+                        : setFieldValue("physical", [...values.physical, type])
                     }
-                    onClick={() => {
-                      if (values.physical.includes(type))
-                        setFieldValue(
-                          "physical",
-                          values.physical.filter((p) => p !== type),
-                        );
-                      else
-                        setFieldValue("physical", [...values.physical, type]);
-                    }}
                   >
                     {type}
                   </Button>
@@ -305,18 +273,14 @@ export const ReportCard = ({
                   htmlFor="upload"
                   className="flex items-center justify-center gap-2 border border-gray-400 rounded-lg p-2 cursor-pointer bg-white hover:bg-gradient-to-r hover:from-green-400 hover:to-blue-400 transition-all duration-300 shadow-md"
                 >
-                  <Image
-                    src="/upload.svg"
-                    alt="Upload"
-                    width={30}
-                    height={30}
-                  />{" "}
-                  Upload Images
+                  <Image src="/upload.svg" alt="Upload" width={30} height={30} /> Upload Images
                 </label>
 
                 {uploadMessage && (
                   <p
-                    className={`mt-2 font-semibold ${uploadMessage.includes("❌") ? "text-red-600" : "text-green-600"}`}
+                    className={`mt-2 font-semibold ${
+                      uploadMessage.includes("❌") ? "text-red-600" : "text-green-600"
+                    }`}
                   >
                     {uploadMessage}
                   </p>
@@ -401,9 +365,7 @@ export const ReportCard = ({
             >
               <XCircle size={28} />
             </button>
-            <h2 className="text-3xl font-bold text-center text-green-600 mb-6">
-              Submitted!
-            </h2>
+            <h2 className="text-3xl font-bold text-center text-green-600 mb-6">Submitted!</h2>
             <p className="font-bold mb-[20px] flex justify-center items-center">
               Thank you for helping out our community!
             </p>

@@ -7,6 +7,7 @@ export interface User {
   _id: string;
   username: string;
   email: string;
+  profileImage?: { url: string };
 }
 
 interface UserContextType {
@@ -26,45 +27,42 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const storedUser = localStorage.getItem("user");
-    const storedToken = localStorage.getItem("token");
+    const initUser = async () => {
+      const storedUser = localStorage.getItem("user");
+      const storedToken = localStorage.getItem("token");
 
-    if (storedToken && storedUser) {
+      if (!storedUser || !storedToken) {
+        setUser(null);
+        setToken(null);
+        setLoading(false);
+        return;
+      }
+
       try {
         const parsedUser: User = JSON.parse(storedUser);
-        setToken(storedToken);
+        const fetchedUser = await getSingleUser(parsedUser._id);
 
-        getSingleUser<User>(parsedUser._id)
-          .then((fetchedUser) => {
-            if (fetchedUser) {
-              setUser(fetchedUser);
-              localStorage.setItem("user", JSON.stringify(fetchedUser));
-            } else {
-              setUser(null);
-              setToken(null);
-              localStorage.removeItem("user");
-              localStorage.removeItem("token");
-            }
-          })
-          .catch(() => {
-            setUser(null);
-            setToken(null);
-            localStorage.removeItem("user");
-            localStorage.removeItem("token");
-          })
-          .finally(() => setLoading(false));
+        if (fetchedUser && typeof fetchedUser === "object" && "_id" in fetchedUser) {
+          setUser(fetchedUser as User);
+          setToken(storedToken);
+          localStorage.setItem("user", JSON.stringify(fetchedUser));
+        } else {
+          setUser(null);
+          setToken(null);
+          localStorage.removeItem("user");
+          localStorage.removeItem("token");
+        }
       } catch {
         setUser(null);
         setToken(null);
         localStorage.removeItem("user");
         localStorage.removeItem("token");
+      } finally {
         setLoading(false);
       }
-    } else {
-      setUser(null);
-      setToken(null);
-      setLoading(false);
-    }
+    };
+
+    initUser();
   }, []);
 
   const logout = () => {
