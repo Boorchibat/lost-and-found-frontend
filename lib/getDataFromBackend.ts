@@ -65,7 +65,7 @@ export const update = async <T, D>(
   return data;
 };
 
-export const updateItemStatus = async <T, D>(
+export const updateItemStatus = async <T>(
   endpoint: string,
   token: string
 ): Promise<T> => {
