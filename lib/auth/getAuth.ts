@@ -6,7 +6,7 @@ export interface User {
   email: string;
 }
 
-export interface SignInPayload {
+export interface SignInPayload extends Record<string, unknown> {
   email: string;
   password: string;
 }
